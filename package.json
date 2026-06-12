@@ -1,0 +1,26 @@
+{
+  "name": "datenkatalog-dashboard",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.2.20",
+  "license": "GPL-3.0",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "data:download": "node scripts/download-datenkatalog-data.mjs",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "bs-dashboard-base": "github:StataBS/bs-dashboard-base#main",
+    "nuxt": "^4.0.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  }
+}

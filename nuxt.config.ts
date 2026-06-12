@@ -10,7 +10,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   app: {
-    baseURL: process.env.NUXT_APP_BASE_URL || '/datenkatalog-dashboard/',
+    baseURL: '/datenkatalog-dashboard/',
     head: {
       htmlAttrs: { lang: 'de' },
       title: 'Datenkatalog Dashboard',
