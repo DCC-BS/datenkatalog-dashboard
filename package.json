@@ -11,7 +11,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "data:download": "node scripts/download-datenkatalog-data.mjs",
-    "postinstall": "nuxt prepare"
+    "postinstall": "npx nuxt prepare"
   },
   "dependencies": {
     "bs-dashboard-base": "github:StataBS/bs-dashboard-base#main",
