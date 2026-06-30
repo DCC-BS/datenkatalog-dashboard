@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { buildTimelineRows } from '~/utils/datenkatalog-data'
+
 useHead({
   title: 'Datenkatalog – Umsetzungsstand | Kanton Basel-Stadt',
 })
@@ -6,6 +8,7 @@ useHead({
 const { data, pending, error } = await useDatenkatalogData()
 
 const kpis = computed(() => data.value?.kpis ?? [])
+const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
 </script>
 
 <template>
@@ -28,8 +31,8 @@ const kpis = computed(() => data.value?.kpis ?? [])
         </p>
         <p>
           Die Kennzahlen unten zeigen, wie viele Dienststellen die jeweilige Phase bereits
-          erreicht haben. Der Zeitplan visualisiert die geplanten und tatsächlichen Termine
-          pro Dienststelle (folgt).
+          erreicht haben. Der Zeitstrahl visualisiert die erreichten Termine pro laufender
+          Dienststelle.
         </p>
       </div>
     </div>
@@ -74,26 +77,33 @@ const kpis = computed(() => data.value?.kpis ?? [])
 
     <div>
       <h3 class="h3 mb-20 lg:mb-30 mt-10 md:mt-40 xl:mt-50 scroll-mt-10 xl:pr-140">
-        Zeitplan (Gantt)
+        Zeitstrahl je Dienststelle
       </h3>
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Übersicht der geplanten und tatsächlichen Termine je Dienststelle und Phase.
+            Übersicht der erreichten Termine je laufender Dienststelle und Phase, von
+            Erstkontakt bis heute.
           </p>
         </div>
       </div>
 
       <div
-        class="gantt-placeholder flex items-center justify-center text-primary-600 text-center hyphens-auto"
-        role="img"
-        aria-label="Platzhalter für Gantt-Diagramm"
+        v-if="pending"
+        class="text-primary-600"
       >
-        <p class="max-w-prose px-20">
-          Gantt-Diagramm folgt – zeigt pro Dienststelle die geplanten und tatsächlichen
-          Termine der einzelnen Phasen.
-        </p>
+        Daten werden geladen …
       </div>
+      <div
+        v-else-if="error"
+        class="text-red-700"
+      >
+        Daten konnten nicht geladen werden. Bitte API-Schlüssel und Portalzugriff prüfen.
+      </div>
+      <DienststellenTimeline
+        v-else
+        :rows="timelineRows"
+      />
     </div>
 
     <div>
@@ -116,12 +126,3 @@ const kpis = computed(() => data.value?.kpis ?? [])
     </div>
   </div>
 </template>
-
-<style scoped>
-.gantt-placeholder {
-  min-height: 300px;
-  border: 2px dashed #b0bec5;
-  border-radius: 4px;
-  background-color: #f5f8f9;
-}
-</style>
