@@ -29,7 +29,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     feedback: {
       repo: 'Feedback_datenkatalog-dashboard',
-      repoOwner: 'StataBS',
+      repoOwner: 'DDC-BS',
       project: 'datenkatalog-dashboard',
       githubToken: process.env.FEEDBACK_GITHUB_TOKEN || '',
       label: 'feedback',
