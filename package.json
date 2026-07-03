@@ -15,11 +15,13 @@
   },
   "dependencies": {
     "bs-dashboard-base": "github:StataBS/bs-dashboard-base#main",
+    "d3": "^7.9.0",
     "nuxt": "^4.0.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
+    "@types/d3": "^7.4.3",
     "@types/node": "^22.10.0",
     "typescript": "^5.7.0"
   }
