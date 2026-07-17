@@ -92,6 +92,20 @@ function closeMilestone() {
       Aktuell sind keine Dienststellen in Bearbeitung.
     </div>
     <template v-else>
+      <div class="rollout-timeline__legend flex flex-wrap gap-10 mb-10">
+        <div
+          v-for="item in legendItems"
+          :key="item.key"
+          class="flex items-center gap-5"
+        >
+          <span
+            class="inline-block w-10 h-10 rounded-sm"
+            :class="item.swatchClass"
+          />
+          <span class="text-xs text-primary-600">{{ item.title }}</span>
+        </div>
+      </div>
+
       <div class="rollout-timeline__body flex">
         <div
           class="rollout-timeline__labels flex-shrink-0 w-140 sm:w-220"
@@ -197,20 +211,6 @@ function closeMilestone() {
             <strong>{{ activeMilestone.title }}</strong>
             <div>{{ formatDate(new Date(activeMilestone.date)) }}</div>
           </div>
-        </div>
-      </div>
-
-      <div class="rollout-timeline__legend flex flex-wrap gap-10 mt-10">
-        <div
-          v-for="item in legendItems"
-          :key="item.key"
-          class="flex items-center gap-5"
-        >
-          <span
-            class="inline-block w-10 h-10 rounded-sm"
-            :class="item.swatchClass"
-          />
-          <span class="text-xs text-primary-600">{{ item.title }}</span>
         </div>
       </div>
     </template>
