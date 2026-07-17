@@ -220,6 +220,11 @@ function closeMilestone() {
 <style scoped>
 .rollout-timeline__scroll {
   scrollbar-width: thin;
+  direction: rtl;
+}
+
+.rollout-timeline__scroll > * {
+  direction: ltr;
 }
 
 .rollout-timeline__tooltip {
