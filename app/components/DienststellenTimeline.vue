@@ -155,6 +155,16 @@ function closeMilestone() {
               v-for="(row, rowIndex) in rows"
               :key="row.posten"
             >
+              <line
+                v-if="row.connectorLine"
+                :x1="xScale(row.connectorLine.start)"
+                :x2="xScale(row.connectorLine.end)"
+                :y1="rowY(rowIndex) + ROW_HEIGHT / 2"
+                :y2="rowY(rowIndex) + ROW_HEIGHT / 2"
+                class="stroke-gray-400"
+                stroke-width="1.5"
+                stroke-dasharray="4 3"
+              />
               <rect
                 v-for="milestone in row.milestones"
                 :key="milestone.key"
