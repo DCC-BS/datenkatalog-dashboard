@@ -37,7 +37,7 @@ const githubIconSrc = withBase('/icons/github-mark.svg', useRuntimeConfig().app.
           <li>
             <a
               class="button is-sm is-link"
-              href="https://data.bs.ch/explore/dataset/100542/"
+              href="https://data.bs.ch/explore/dataset/100537/"
               target="_blank"
               rel="noopener noreferrer"
             >

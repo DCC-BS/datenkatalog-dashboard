@@ -1,4 +1,4 @@
-export const DATASET_ID = '100542'
+export const DATASET_ID = '100537'
 
 export interface DatenkatalogRow {
   departement: string
