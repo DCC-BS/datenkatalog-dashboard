@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 const BASE_URL = 'https://data.bs.ch/api/explore/v2.1/catalog/datasets'
-const DATASET_ID = '100542'
+const DATASET_ID = '100537'
 
 async function main() {
   const apiKey = process.env.NUXT_PUBLIC_BS_API_KEY?.trim()

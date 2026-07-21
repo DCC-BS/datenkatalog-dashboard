@@ -1,4 +1,4 @@
-export const DATASET_ID = '100542'
+export const DATASET_ID = '100537'
 
 export interface DatenkatalogRow {
   departement: string
@@ -133,28 +133,31 @@ export interface TimelineRow {
   posten: string
   departmentAbbreviation: string
   label: string
+  phaseRank: number
   sortDate: string
   segments: TimelineSegment[]
   milestones: TimelineMilestone[]
 }
 
-function isActiveRow(
+function isTimelineRow(
   row: DatenkatalogRow,
 ): row is DatenkatalogRow & { status_kontaktiert: string } {
-  return hasPhaseValue(row.status_kontaktiert) && !hasPhaseValue(row.status_abgeschlossen)
+  return hasPhaseValue(row.status_kontaktiert)
 }
 
 /**
- * Builds one timeline row per active Dienststelle (contacted, not yet officially
- * abgenommen). Each reached phase becomes a colored segment running from its own
- * milestone date to the next reached milestone's date, or to today for the
- * current (last reached) phase.
+ * Builds one timeline row per contacted Dienststelle. Each reached phase becomes
+ * a colored segment running from its own milestone date to the next reached
+ * milestone's date, or to today for the current (last reached) phase. Completed
+ * rows end on their Abnahme date.
  */
 export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
   const today = new Date()
 
-  const timelineRows = rows.filter(isActiveRow).map((row) => {
+  const timelineRows = rows.filter(isTimelineRow).map((row) => {
     const reachedPhases = PHASE_DEFINITIONS.filter((phase) => hasPhaseValue(row[phase.field]))
+    const isComplete = hasPhaseValue(row.status_abgeschlossen)
+    const phaseRank = PHASE_DEFINITIONS.findLastIndex((phase) => hasPhaseValue(row[phase.field]))
 
     const milestones: TimelineMilestone[] = reachedPhases.map((phase) => ({
       key: phase.key,
@@ -162,15 +165,18 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
       date: row[phase.field] as string,
     }))
 
-    const segments: TimelineSegment[] = reachedPhases.map((phase, index) => {
+    const segments: TimelineSegment[] = reachedPhases.flatMap((phase, index) => {
       const next = reachedPhases[index + 1]
-      return {
+      if (!next && isComplete) {
+        return []
+      }
+      return [{
         key: phase.key,
         title: phase.title,
         colorClass: phase.colorClass,
         start: new Date(row[phase.field] as string),
         end: next ? new Date(row[next.field] as string) : today,
-      }
+      }]
     })
 
     const abbreviation = getDepartmentAbbreviation(row.departement)
@@ -179,6 +185,7 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
       posten: row.posten,
       departmentAbbreviation: abbreviation,
       label: `${abbreviation} - ${row.posten}`,
+      phaseRank,
       sortDate: row.status_kick_off ?? row.status_kontaktiert,
       segments,
       milestones,
@@ -186,6 +193,9 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
   })
 
   return timelineRows.sort(
-    (a, b) => a.sortDate.localeCompare(b.sortDate) || a.posten.localeCompare(b.posten),
+    (a, b) =>
+      b.phaseRank - a.phaseRank
+      || a.sortDate.localeCompare(b.sortDate)
+      || a.posten.localeCompare(b.posten),
   )
 }
