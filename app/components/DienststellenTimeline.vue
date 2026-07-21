@@ -7,7 +7,8 @@ const props = defineProps<{
 }>()
 
 const ROW_HEIGHT = 36
-const BAR_HEIGHT = 14
+const MILESTONE_SIZE = 12
+const MILESTONE_HIT_SIZE = 20
 const AXIS_HEIGHT = 28
 const PX_PER_DAY = 6
 const MIN_CHART_WIDTH = 480
@@ -18,7 +19,7 @@ const formatDate = d3.timeFormat('%d.%m.%Y')
 const formatTick = d3.timeFormat('%m.%Y')
 
 const timeDomain = computed<[Date, Date]>(() => {
-  const dates = props.rows.flatMap((row) => row.segments.flatMap((segment) => [segment.start, segment.end]))
+  const dates = props.rows.flatMap((row) => row.milestones.map((milestone) => new Date(milestone.date)))
   if (dates.length === 0) {
     return [today, today]
   }
@@ -92,7 +93,7 @@ function closeMilestone() {
       Aktuell sind keine Dienststellen in Bearbeitung.
     </div>
     <template v-else>
-      <div class="rollout-timeline__legend flex flex-wrap gap-10 mb-10">
+      <div class="rollout-timeline__legend flex flex-wrap items-center gap-10 mb-10">
         <div
           v-for="item in legendItems"
           :key="item.key"
@@ -155,33 +156,26 @@ function closeMilestone() {
               :key="row.posten"
             >
               <rect
-                v-for="segment in row.segments"
-                :key="segment.key"
-                :x="xScale(segment.start)"
-                :y="rowY(rowIndex) + (ROW_HEIGHT - BAR_HEIGHT) / 2"
-                :width="Math.max(xScale(segment.end) - xScale(segment.start), 1)"
-                :height="BAR_HEIGHT"
-                rx="2"
-                :class="segment.colorClass"
-              />
-              <circle
                 v-for="milestone in row.milestones"
                 :key="milestone.key"
-                :cx="xScale(new Date(milestone.date))"
-                :cy="rowY(rowIndex) + ROW_HEIGHT / 2"
-                r="9"
+                :x="xScale(new Date(milestone.date)) - MILESTONE_SIZE / 2"
+                :y="rowY(rowIndex) + ROW_HEIGHT / 2 - MILESTONE_SIZE / 2"
+                :width="MILESTONE_SIZE"
+                :height="MILESTONE_SIZE"
+                rx="2"
+                :class="milestone.colorClass"
+                class="pointer-events-none"
+              />
+              <rect
+                v-for="milestone in row.milestones"
+                :key="`hit-${milestone.key}`"
+                :x="xScale(new Date(milestone.date)) - MILESTONE_HIT_SIZE / 2"
+                :y="rowY(rowIndex) + ROW_HEIGHT / 2 - MILESTONE_HIT_SIZE / 2"
+                :width="MILESTONE_HIT_SIZE"
+                :height="MILESTONE_HIT_SIZE"
                 fill="transparent"
                 class="cursor-pointer"
                 @click.stop="toggleMilestone(rowIndex, milestone)"
-              />
-              <circle
-                v-for="milestone in row.milestones"
-                :key="`dot-${milestone.key}`"
-                :cx="xScale(new Date(milestone.date))"
-                :cy="rowY(rowIndex) + ROW_HEIGHT / 2"
-                r="4"
-                class="fill-white stroke-primary-700 pointer-events-none"
-                stroke-width="1.5"
               />
             </g>
 
@@ -210,6 +204,21 @@ function closeMilestone() {
           >
             <strong>{{ activeMilestone.title }}</strong>
             <div>{{ formatDate(new Date(activeMilestone.date)) }}</div>
+          </div>
+        </div>
+
+        <div
+          class="rollout-timeline__status flex-shrink-0 w-100 sm:w-140 pl-10"
+          :style="{ paddingTop: `${AXIS_HEIGHT}px` }"
+        >
+          <div
+            v-for="row in rows"
+            :key="row.posten"
+            class="truncate text-xs sm:text-sm text-primary-600"
+            :style="{ height: `${ROW_HEIGHT}px`, lineHeight: `${ROW_HEIGHT}px` }"
+            :title="row.currentPhaseTitle"
+          >
+            {{ row.currentPhaseTitle }}
           </div>
         </div>
       </div>
