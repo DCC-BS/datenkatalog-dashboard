@@ -10,7 +10,6 @@
     "build": "nuxt build",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "data:download": "node scripts/download-datenkatalog-data.mjs",
     "postinstall": "npx nuxt prepare"
   },
   "dependencies": {

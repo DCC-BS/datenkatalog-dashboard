@@ -8,19 +8,9 @@ export function useBsApi() {
   const requestFetch = useRequestFetch()
 
   const fetchDataset = async (odsId: string) => {
-    const localPath = `/data/${odsId}.json`
-    try {
-      const localData = await requestFetch<unknown[]>(localPath)
-      if (Array.isArray(localData)) {
-        return localData
-      }
-    } catch {
-      // Fall back to live API when local JSON is unavailable.
-    }
-
     const key = config.public.bsApiKey as string
     if (!key?.trim()) {
-      throw new Error(`Missing local ${localPath} and no NUXT_PUBLIC_BS_API_KEY.`)
+      throw new Error('Missing NUXT_PUBLIC_BS_API_KEY.')
     }
     try {
       const response = await requestFetch<unknown[]>(`${BASE_URL}/${odsId}/exports/json`, {
