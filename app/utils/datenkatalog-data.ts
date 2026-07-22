@@ -123,8 +123,8 @@ export interface TimelineMilestone {
 }
 
 export interface TimelineConnectorLine {
-  start: Date
-  end: Date
+  start: string
+  end: string
 }
 
 export interface TimelineRow {
@@ -138,10 +138,18 @@ export interface TimelineRow {
   connectorLine: TimelineConnectorLine | null
 }
 
-function isTimelineRow(
-  row: DatenkatalogRow,
-): row is DatenkatalogRow & { status_kontaktiert: string } {
-  return hasPhaseValue(row.status_kontaktiert)
+function isTimelineRow(row: DatenkatalogRow): boolean {
+  return PHASE_DEFINITIONS.some((phase) => hasPhaseValue(row[phase.field]))
+}
+
+function getSortDate(row: DatenkatalogRow): string {
+  for (const phase of PHASE_DEFINITIONS) {
+    const value = row[phase.field]
+    if (hasPhaseValue(value)) {
+      return value as string
+    }
+  }
+  return ''
 }
 
 /**
@@ -158,9 +166,29 @@ function getCurrentPhaseTitle(lastPhaseKey: string): string {
 }
 
 /**
- * Builds one timeline row per contacted Dienststelle. Each reached phase becomes
- * a colored milestone on the timeline, connected by a single line from Kick-Off
- * to Abnahme (or today, if Abnahme hasn't been reached yet).
+ * Dashed connector from the first reached phase after Kontaktiert through to
+ * Abnahme (or today if Abnahme has not been reached).
+ */
+function buildConnectorLine(
+  row: DatenkatalogRow,
+  today: Date,
+): TimelineConnectorLine | null {
+  const startPhase = PHASE_DEFINITIONS
+    .filter((phase) => phase.key !== 'kontaktiert')
+    .find((phase) => hasPhaseValue(row[phase.field]))
+  if (!startPhase) {
+    return null
+  }
+  const end = hasPhaseValue(row.status_abgeschlossen)
+    ? (row.status_abgeschlossen as string)
+    : today.toISOString().slice(0, 10)
+  return { start: row[startPhase.field] as string, end }
+}
+
+/**
+ * Builds one timeline row per Dienststelle with at least one phase date. Each
+ * reached phase becomes a colored milestone. A dashed connector runs from the
+ * first phase after Kontaktiert to Abnahme (or today if Abnahme is missing).
  */
 export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
   const today = new Date()
@@ -176,14 +204,7 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
       colorClass: phase.colorClass,
     }))
 
-    const connectorLine: TimelineConnectorLine | null = hasPhaseValue(row.status_kick_off)
-      ? {
-          start: new Date(row.status_kick_off as string),
-          end: hasPhaseValue(row.status_abgeschlossen)
-            ? new Date(row.status_abgeschlossen as string)
-            : today,
-        }
-      : null
+    const connectorLine = buildConnectorLine(row, today)
 
     const abbreviation = getDepartmentAbbreviation(row.departement)
 
@@ -192,7 +213,7 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
       departmentAbbreviation: abbreviation,
       label: `${abbreviation} - ${row.posten}`,
       phaseRank,
-      sortDate: row.status_kick_off ?? row.status_kontaktiert,
+      sortDate: row.status_kick_off ?? getSortDate(row),
       currentPhaseTitle: getCurrentPhaseTitle(PHASE_DEFINITIONS[phaseRank].key),
       milestones,
       connectorLine,

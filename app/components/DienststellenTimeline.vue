@@ -157,8 +157,8 @@ function closeMilestone() {
             >
               <line
                 v-if="row.connectorLine"
-                :x1="xScale(row.connectorLine.start)"
-                :x2="xScale(row.connectorLine.end)"
+                :x1="xScale(new Date(row.connectorLine.start))"
+                :x2="xScale(new Date(row.connectorLine.end))"
                 :y1="rowY(rowIndex) + ROW_HEIGHT / 2"
                 :y2="rowY(rowIndex) + ROW_HEIGHT / 2"
                 class="stroke-gray-400"
