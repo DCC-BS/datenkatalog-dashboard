@@ -36,29 +36,29 @@ export const PHASE_DEFINITIONS = [
   {
     key: 'kickoff',
     field: 'status_kick_off',
-    title: 'Kick-off',
-    description: 'Kick-off-Termin durchgeführt',
+    title: 'Kick-Off',
+    description: 'Kick-Off-Termin durchgeführt',
     colorClass: 'fill-primary-400',
   },
   {
     key: 'metadaten',
     field: 'status_metadatenerfassung',
-    title: 'Metadaten erfasst',
-    description: 'Metadaten im Katalog erfasst',
+    title: 'Beginn Metadatenerfassung',
+    description: 'Start der Metadatenerfassung im Katalog',
     colorClass: 'fill-primary-500',
   },
   {
     key: 'review',
     field: 'status_review_und_abnahme',
-    title: 'Review / Abnahme',
-    description: 'Review und fachliche Abnahme',
+    title: 'Review',
+    description: 'Fachliche Prüfung der erfassten Metadaten',
     colorClass: 'fill-primary-700',
   },
   {
     key: 'abgenommen',
     field: 'status_abgeschlossen',
-    title: 'Offiziell abgenommen',
-    description: 'Formale Abnahme abgeschlossen',
+    title: 'Abnahme',
+    description: 'Formeller Abschluss der Umsetzung',
     colorClass: 'fill-primary-900',
   },
 ] as const satisfies ReadonlyArray<{
@@ -119,14 +119,12 @@ export interface TimelineMilestone {
   key: string
   title: string
   date: string
+  colorClass: string
 }
 
-export interface TimelineSegment {
-  key: string
-  title: string
-  colorClass: string
-  start: Date
-  end: Date
+export interface TimelineConnectorLine {
+  start: string
+  end: string
 }
 
 export interface TimelineRow {
@@ -135,49 +133,78 @@ export interface TimelineRow {
   label: string
   phaseRank: number
   sortDate: string
-  segments: TimelineSegment[]
+  currentPhaseTitle: string
   milestones: TimelineMilestone[]
+  connectorLine: TimelineConnectorLine | null
 }
 
-function isTimelineRow(
-  row: DatenkatalogRow,
-): row is DatenkatalogRow & { status_kontaktiert: string } {
-  return hasPhaseValue(row.status_kontaktiert)
+function isTimelineRow(row: DatenkatalogRow): boolean {
+  return PHASE_DEFINITIONS.some((phase) => hasPhaseValue(row[phase.field]))
+}
+
+function getSortDate(row: DatenkatalogRow): string {
+  for (const phase of PHASE_DEFINITIONS) {
+    const value = row[phase.field]
+    if (hasPhaseValue(value)) {
+      return value as string
+    }
+  }
+  return ''
 }
 
 /**
- * Builds one timeline row per contacted Dienststelle. Each reached phase becomes
- * a colored segment running from its own milestone date to the next reached
- * milestone's date, or to today for the current (last reached) phase. Completed
- * rows end on their Abnahme date.
+ * Returns the label shown as the current status for a Dienststelle. While
+ * Metadatenerfassung has started but Review hasn't been reached yet, the
+ * milestone title ("Beginn Metadatenerfassung") is replaced by the active
+ * process name ("Metadatenerfassung").
+ */
+function getCurrentPhaseTitle(lastPhaseKey: string): string {
+  if (lastPhaseKey === 'metadaten') {
+    return 'Metadatenerfassung'
+  }
+  return PHASE_DEFINITIONS.find((phase) => phase.key === lastPhaseKey)!.title
+}
+
+/**
+ * Dashed connector from the first reached phase after Kontaktiert through to
+ * Abnahme (or today if Abnahme has not been reached).
+ */
+function buildConnectorLine(
+  row: DatenkatalogRow,
+  today: Date,
+): TimelineConnectorLine | null {
+  const startPhase = PHASE_DEFINITIONS
+    .filter((phase) => phase.key !== 'kontaktiert')
+    .find((phase) => hasPhaseValue(row[phase.field]))
+  if (!startPhase) {
+    return null
+  }
+  const end = hasPhaseValue(row.status_abgeschlossen)
+    ? (row.status_abgeschlossen as string)
+    : today.toISOString().slice(0, 10)
+  return { start: row[startPhase.field] as string, end }
+}
+
+/**
+ * Builds one timeline row per Dienststelle with at least one phase date. Each
+ * reached phase becomes a colored milestone. A dashed connector runs from the
+ * first phase after Kontaktiert to Abnahme (or today if Abnahme is missing).
  */
 export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
   const today = new Date()
 
   const timelineRows = rows.filter(isTimelineRow).map((row) => {
     const reachedPhases = PHASE_DEFINITIONS.filter((phase) => hasPhaseValue(row[phase.field]))
-    const isComplete = hasPhaseValue(row.status_abgeschlossen)
     const phaseRank = PHASE_DEFINITIONS.findLastIndex((phase) => hasPhaseValue(row[phase.field]))
 
     const milestones: TimelineMilestone[] = reachedPhases.map((phase) => ({
       key: phase.key,
       title: phase.title,
       date: row[phase.field] as string,
+      colorClass: phase.colorClass,
     }))
 
-    const segments: TimelineSegment[] = reachedPhases.flatMap((phase, index) => {
-      const next = reachedPhases[index + 1]
-      if (!next && isComplete) {
-        return []
-      }
-      return [{
-        key: phase.key,
-        title: phase.title,
-        colorClass: phase.colorClass,
-        start: new Date(row[phase.field] as string),
-        end: next ? new Date(row[next.field] as string) : today,
-      }]
-    })
+    const connectorLine = buildConnectorLine(row, today)
 
     const abbreviation = getDepartmentAbbreviation(row.departement)
 
@@ -186,9 +213,10 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
       departmentAbbreviation: abbreviation,
       label: `${abbreviation} - ${row.posten}`,
       phaseRank,
-      sortDate: row.status_kick_off ?? row.status_kontaktiert,
-      segments,
+      sortDate: row.status_kick_off ?? getSortDate(row),
+      currentPhaseTitle: getCurrentPhaseTitle(PHASE_DEFINITIONS[phaseRank].key),
       milestones,
+      connectorLine,
     }
   })
 

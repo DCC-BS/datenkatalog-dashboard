@@ -38,13 +38,6 @@ bun run build
 bun run preview
 ```
 
-Optionally pre-download the open data portal datasets into `public/data` (otherwise
-the server APIs fetch and cache them on demand):
-
-```bash
-bun run data:download
-```
-
 ## Running with Docker
 
 The `Dockerfile` builds the app and serves it with the Nitro production server on
