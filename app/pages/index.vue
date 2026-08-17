@@ -9,6 +9,21 @@ const { data, pending, error } = await useDatenkatalogData()
 
 const kpis = computed(() => data.value?.kpis ?? [])
 const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
+
+/** null = show all; otherwise only Dienststellen currently in that phase */
+const selectedPhaseKey = ref<string | null>(null)
+
+function togglePhaseFilter(phaseKey: string) {
+  selectedPhaseKey.value = selectedPhaseKey.value === phaseKey ? null : phaseKey
+}
+
+const filteredTimelineRows = computed(() => {
+  const phaseKey = selectedPhaseKey.value
+  if (!phaseKey) {
+    return timelineRows.value
+  }
+  return timelineRows.value.filter((row) => row.currentPhaseKey === phaseKey)
+})
 </script>
 
 <template>
@@ -71,6 +86,17 @@ const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
           :title="kpi.title"
           :description="kpi.description"
           :value="kpi.count"
+          class="phase-filter-control"
+          :class="{
+            'phase-filter-control--selected': selectedPhaseKey === kpi.key,
+            'phase-filter-control--dimmed': selectedPhaseKey != null && selectedPhaseKey !== kpi.key,
+          }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="selectedPhaseKey === kpi.key"
+          @click="togglePhaseFilter(kpi.key)"
+          @keydown.enter.prevent="togglePhaseFilter(kpi.key)"
+          @keydown.space.prevent="togglePhaseFilter(kpi.key)"
         />
       </div>
     </div>
@@ -102,7 +128,9 @@ const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
       </div>
       <DienststellenTimeline
         v-else
-        :rows="timelineRows"
+        :rows="filteredTimelineRows"
+        :selected-phase-key="selectedPhaseKey"
+        @select-phase="togglePhaseFilter"
       />
     </div>
 
@@ -126,3 +154,18 @@ const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
     </div>
   </div>
 </template>
+
+<style scoped>
+.phase-filter-control {
+  cursor: pointer;
+}
+
+.phase-filter-control--selected {
+  border-color: var(--color-primary-600, #00838f);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary-600, #00838f) 35%, transparent);
+}
+
+.phase-filter-control--dimmed {
+  opacity: 0.55;
+}
+</style>

@@ -133,6 +133,7 @@ export interface TimelineRow {
   label: string
   phaseRank: number
   sortDate: string
+  currentPhaseKey: string
   currentPhaseTitle: string
   milestones: TimelineMilestone[]
   connectorLine: TimelineConnectorLine | null
@@ -208,13 +209,16 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
 
     const abbreviation = getDepartmentAbbreviation(row.departement)
 
+    const currentPhaseKey = PHASE_DEFINITIONS[phaseRank].key
+
     return {
       posten: row.posten,
       departmentAbbreviation: abbreviation,
       label: `${abbreviation} - ${row.posten}`,
       phaseRank,
       sortDate: row.status_kick_off ?? getSortDate(row),
-      currentPhaseTitle: getCurrentPhaseTitle(PHASE_DEFINITIONS[phaseRank].key),
+      currentPhaseKey,
+      currentPhaseTitle: getCurrentPhaseTitle(currentPhaseKey),
       milestones,
       connectorLine,
     }

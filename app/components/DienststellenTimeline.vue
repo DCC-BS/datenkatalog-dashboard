@@ -4,6 +4,11 @@ import { PHASE_DEFINITIONS, type TimelineMilestone, type TimelineRow } from '~/u
 
 const props = defineProps<{
   rows: TimelineRow[]
+  selectedPhaseKey?: string | null
+}>()
+
+const emit = defineEmits<{
+  'select-phase': [phaseKey: string]
 }>()
 
 const ROW_HEIGHT = 36
@@ -64,6 +69,13 @@ interface ActiveMilestone {
 
 const activeMilestone = ref<ActiveMilestone | null>(null)
 
+watch(
+  () => props.rows,
+  () => {
+    activeMilestone.value = null
+  },
+)
+
 function toggleMilestone(rowIndex: number, milestone: TimelineMilestone) {
   if (activeMilestone.value?.rowIndex === rowIndex && activeMilestone.value?.key === milestone.key) {
     activeMilestone.value = null
@@ -82,32 +94,52 @@ function toggleMilestone(rowIndex: number, milestone: TimelineMilestone) {
 function closeMilestone() {
   activeMilestone.value = null
 }
+
+function onLegendPhaseClick(phaseKey: string) {
+  emit('select-phase', phaseKey)
+}
 </script>
 
 <template>
   <div class="rollout-timeline">
     <div
-      v-if="rows.length === 0"
+      v-if="rows.length === 0 && !selectedPhaseKey"
       class="text-primary-600"
     >
       Aktuell sind keine Dienststellen in Bearbeitung.
     </div>
     <template v-else>
       <div class="rollout-timeline__legend flex flex-wrap items-center gap-10 mb-10">
-        <div
+        <button
           v-for="item in legendItems"
           :key="item.key"
-          class="flex items-center gap-5"
+          type="button"
+          class="rollout-timeline__legend-item flex items-center gap-5"
+          :class="{
+            'rollout-timeline__legend-item--selected': selectedPhaseKey === item.key,
+            'rollout-timeline__legend-item--dimmed': selectedPhaseKey != null && selectedPhaseKey !== item.key,
+          }"
+          :aria-pressed="selectedPhaseKey === item.key"
+          @click="onLegendPhaseClick(item.key)"
         >
           <span
             class="inline-block w-10 h-10 rounded-sm"
             :class="item.swatchClass"
           />
           <span class="text-xs text-primary-600">{{ item.title }}</span>
-        </div>
+        </button>
       </div>
 
-      <div class="rollout-timeline__body flex">
+      <div
+        v-if="rows.length === 0"
+        class="text-primary-600"
+      >
+        Keine Dienststellen in dieser Phase.
+      </div>
+      <div
+        v-else
+        class="rollout-timeline__body flex"
+      >
         <div
           class="rollout-timeline__labels flex-shrink-0 w-140 sm:w-220"
           :style="{ paddingTop: `${AXIS_HEIGHT}px` }"
@@ -250,5 +282,22 @@ function closeMilestone() {
   transform: translate(-50%, -130%);
   white-space: nowrap;
   z-index: 10;
+}
+
+.rollout-timeline__legend-item {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.35rem;
+  cursor: pointer;
+}
+
+.rollout-timeline__legend-item--selected {
+  border-color: var(--color-primary-600, #00838f);
+  background: color-mix(in srgb, var(--color-primary-600, #00838f) 8%, white);
+}
+
+.rollout-timeline__legend-item--dimmed {
+  opacity: 0.45;
 }
 </style>
