@@ -25,6 +25,8 @@ export const PHASE_DEFINITIONS = [
     title: 'Kontaktiert',
     description: 'Erstkontakt mit Dienststelle',
     colorClass: 'fill-primary-200',
+    detailContent:
+      '<p>In der Kontaktphase wird die zuständige Dienststelle erstmalig angesprochen. Ziel ist es, die richtigen Ansprechpersonen zu identifizieren und den weiteren Ablauf abzustimmen.</p>',
   },
   {
     key: 'informiert',
@@ -32,6 +34,8 @@ export const PHASE_DEFINITIONS = [
     title: 'Informiert',
     description: 'Über Projekt und Ablauf informiert',
     colorClass: 'fill-primary-300',
+    detailContent:
+      '<p>Die Dienststelle wird über Ziele, Nutzen und Ablauf des Datenkatalogs informiert. Dazu gehören Zeitplan, Erwartungen an die Metadatenerfassung sowie unterstützende Materialien.</p>',
   },
   {
     key: 'kickoff',
@@ -39,6 +43,8 @@ export const PHASE_DEFINITIONS = [
     title: 'Kick-Off',
     description: 'Kick-Off-Termin durchgeführt',
     colorClass: 'fill-primary-400',
+    detailContent:
+      '<p>Im Kick-off-Termin starten Dienststelle und Projektteam die gemeinsame Umsetzung. Rollen, Verantwortlichkeiten und die nächsten Schritte werden festgelegt.</p>',
   },
   {
     key: 'metadaten',
@@ -46,6 +52,8 @@ export const PHASE_DEFINITIONS = [
     title: 'Beginn Metadatenerfassung',
     description: 'Start der Metadatenerfassung im Katalog',
     colorClass: 'fill-primary-500',
+    detailContent:
+      '<p>Die Dienststelle erfasst die relevanten Metadaten im Kantons-Datenkatalog. Dazu zählen Beschreibungen der Datensätze, Verantwortlichkeiten, Aktualisierungszyklen und ggf. Veröffentlichungsstatus.</p>',
   },
   {
     key: 'review',
@@ -53,6 +61,8 @@ export const PHASE_DEFINITIONS = [
     title: 'Review',
     description: 'Fachliche Prüfung der erfassten Metadaten',
     colorClass: 'fill-primary-700',
+    detailContent:
+      '<p>Die erfassten Metadaten werden fachlich geprüft. Feedback wird eingearbeitet, bis die Dienststelle die Inhalte inhaltlich abgenommen hat.</p>',
   },
   {
     key: 'abgenommen',
@@ -60,6 +70,8 @@ export const PHASE_DEFINITIONS = [
     title: 'Abnahme',
     description: 'Formeller Abschluss der Umsetzung',
     colorClass: 'fill-primary-900',
+    detailContent:
+      '<p>Mit der offiziellen Abnahme ist die Umsetzung für die Dienststelle formell abgeschlossen. Die Metadaten gelten als freigegeben und werden im Datenkatalog entsprechend geführt.</p>',
   },
 ] as const satisfies ReadonlyArray<{
   key: string
@@ -67,7 +79,18 @@ export const PHASE_DEFINITIONS = [
   title: string
   description: string
   colorClass: string
+  detailContent: string
 }>
+
+export interface PhaseInfoItem {
+  title: string
+  content: string
+}
+
+export const PHASE_INFO_ITEMS: PhaseInfoItem[] = PHASE_DEFINITIONS.map((phase) => ({
+  title: `Phase: ${phase.title}`,
+  content: phase.detailContent,
+}))
 
 const DEPARTMENT_ABBREVIATIONS: Record<string, string> = {
   'Präsidialdepartement': 'PD',
@@ -166,15 +189,9 @@ function getSortDate(row: DatenkatalogRow): string {
 }
 
 /**
- * Returns the label shown as the current status for a Dienststelle. While
- * Metadatenerfassung has started but Review hasn't been reached yet, the
- * milestone title ("Beginn Metadatenerfassung") is replaced by the active
- * process name ("Metadatenerfassung").
+ * Returns the label shown as the current status for a Dienststelle.
  */
 function getCurrentPhaseTitle(lastPhaseKey: string): string {
-  if (lastPhaseKey === 'metadaten') {
-    return 'Metadatenerfassung'
-  }
   return PHASE_DEFINITIONS.find((phase) => phase.key === lastPhaseKey)!.title
 }
 

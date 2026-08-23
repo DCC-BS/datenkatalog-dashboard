@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { PHASE_INFO_ITEMS } from '~/utils/datenkatalog-data'
+
 interface AccordionItem {
   title: string
   content: string
@@ -34,36 +36,7 @@ const definitionenItems: AccordionItem[] = [
     content:
       '<p>Das Dashboard dient dem Monitoring des Rollouts des Kantons-Datenkatalogs Basel-Stadt. Es macht für jede beteiligte Dienststelle transparent, in welcher Phase sich die Umsetzung befindet und welche Termine geplant oder bereits erfolgt sind.</p>',
   },
-  {
-    title: 'Phase: Kontakt',
-    content:
-      '<p>In der Kontaktphase wird die zuständige Dienststelle erstmalig angesprochen. Ziel ist es, die richtigen Ansprechpersonen zu identifizieren und den weiteren Ablauf abzustimmen.</p>',
-  },
-  {
-    title: 'Phase: Information',
-    content:
-      '<p>Die Dienststelle wird über Ziele, Nutzen und Ablauf des Datenkatalogs informiert. Dazu gehören Zeitplan, Erwartungen an die Metadatenerfassung sowie unterstützende Materialien.</p>',
-  },
-  {
-    title: 'Phase: Kick-off',
-    content:
-      '<p>Im Kick-off-Termin starten Dienststelle und Projektteam die gemeinsame Umsetzung. Rollen, Verantwortlichkeiten und die nächsten Schritte werden festgelegt.</p>',
-  },
-  {
-    title: 'Phase: Metadatenerfassung',
-    content:
-      '<p>Die Dienststelle erfasst die relevanten Metadaten im Kantons-Datenkatalog. Dazu zählen Beschreibungen der Datensätze, Verantwortlichkeiten, Aktualisierungszyklen und ggf. Veröffentlichungsstatus.</p>',
-  },
-  {
-    title: 'Phase: Review und Abnahme',
-    content:
-      '<p>Die erfassten Metadaten werden fachlich geprüft. Feedback wird eingearbeitet, bis die Dienststelle die Inhalte inhaltlich abgenommen hat.</p>',
-  },
-  {
-    title: 'Phase: Offizielle Abnahme',
-    content:
-      '<p>Mit der offiziellen Abnahme ist die Umsetzung für die Dienststelle formell abgeschlossen. Die Metadaten gelten als freigegeben und werden im Datenkatalog entsprechend geführt.</p>',
-  },
+  ...PHASE_INFO_ITEMS,
 ]
 </script>
 
@@ -95,7 +68,7 @@ const definitionenItems: AccordionItem[] = [
               Definitionen und Erläuterungen
             </h2>
             <p class="text-primary-600 mt-20 lg:text-lg xl:w-4/6 break-words hyphens-auto">
-              Phasen des Datenkatalog-Rollouts von Erstkontakt bis zur offiziellen Abnahme.
+              Phasen des Datenkatalog-Rollouts von Kontaktiert bis Abnahme.
             </p>
           </header>
           <Accordion :items="definitionenItems" />
