@@ -20,6 +20,9 @@ const emit = defineEmits<{
 const ROW_HEIGHT = 36
 const MILESTONE_SIZE = 12
 const MILESTONE_HIT_SIZE = 20
+const CURRENT_MILESTONE_SIZE = 16
+const CURRENT_MILESTONE_HIT_SIZE = 24
+const GROUP_HEADER_HEIGHT = 24
 const AXIS_HEIGHT = 28
 const PX_PER_DAY = 6
 const MIN_CHART_WIDTH = 480
@@ -47,7 +50,83 @@ const chartWidth = computed(() => {
   return Math.max(Math.round(days * PX_PER_DAY), MIN_CHART_WIDTH)
 })
 
-const chartHeight = computed(() => AXIS_HEIGHT + props.rows.length * ROW_HEIGHT)
+/**
+ * Absolute top offset for each row, accounting for the height of every lane
+ * group header rendered above it. Rows sharing the same currentPhaseKey are
+ * contiguous (rows are sorted by phaseRank), so a new header is inserted
+ * whenever the phase key changes.
+ */
+const rowTops = computed<number[]>(() => {
+  const tops: number[] = []
+  let headerCount = 0
+  props.rows.forEach((row, index) => {
+    const isGroupStart = index === 0 || row.currentPhaseKey !== props.rows[index - 1].currentPhaseKey
+    if (isGroupStart) {
+      headerCount += 1
+    }
+    tops.push(AXIS_HEIGHT + headerCount * GROUP_HEADER_HEIGHT + index * ROW_HEIGHT)
+  })
+  return tops
+})
+
+interface LaneGroup {
+  key: string
+  title: string
+  count: number
+  laneFillClass: string
+  startIndex: number
+  top: number
+  height: number
+}
+
+/** One entry per contiguous block of rows sharing the same current phase. */
+const laneGroups = computed<LaneGroup[]>(() => {
+  const groups: LaneGroup[] = []
+  props.rows.forEach((row, index) => {
+    const isGroupStart = index === 0 || row.currentPhaseKey !== props.rows[index - 1].currentPhaseKey
+    const top = rowTops.value[index]
+    if (isGroupStart) {
+      groups.push({
+        key: row.currentPhaseKey,
+        title: row.currentPhaseTitle,
+        count: 1,
+        laneFillClass: row.currentPhaseLaneFillClass,
+        startIndex: index,
+        top,
+        height: ROW_HEIGHT,
+      })
+    } else {
+      const group = groups[groups.length - 1]!
+      group.count += 1
+      group.height = top + ROW_HEIGHT - group.top
+    }
+  })
+  return groups
+})
+
+type LineItem =
+  | { type: 'header', key: string, group: LaneGroup }
+  | { type: 'row', key: string, row: TimelineRow }
+
+/** Flattened list of group headers and rows, used for the label/status columns. */
+const lineItems = computed<LineItem[]>(() => {
+  const items: LineItem[] = []
+  props.rows.forEach((row, index) => {
+    const group = laneGroups.value.find((candidate) => candidate.startIndex === index)
+    if (group) {
+      items.push({ type: 'header', key: `header-${group.key}-${index}`, group })
+    }
+    items.push({ type: 'row', key: row.posten, row })
+  })
+  return items
+})
+
+const chartHeight = computed(() => {
+  if (props.rows.length === 0) {
+    return AXIS_HEIGHT
+  }
+  return rowTops.value[rowTops.value.length - 1]! + ROW_HEIGHT
+})
 
 const xScale = computed(() => d3.scaleTime().domain(timeDomain.value).range([0, chartWidth.value]))
 
@@ -59,12 +138,20 @@ const legendItems = computed(() =>
   PHASE_DEFINITIONS.map((phase) => ({
     key: phase.key,
     title: phase.title,
-    swatchClass: phase.colorClass.replace('fill-', 'bg-'),
+    swatchClass: phase.legendSwatchClass,
   })),
 )
 
 function rowY(rowIndex: number) {
-  return AXIS_HEIGHT + rowIndex * ROW_HEIGHT
+  return rowTops.value[rowIndex] ?? AXIS_HEIGHT + rowIndex * ROW_HEIGHT
+}
+
+function milestoneSize(row: TimelineRow, milestone: TimelineMilestone) {
+  return milestone.key === row.currentPhaseKey ? CURRENT_MILESTONE_SIZE : MILESTONE_SIZE
+}
+
+function milestoneHitSize(row: TimelineRow, milestone: TimelineMilestone) {
+  return milestone.key === row.currentPhaseKey ? CURRENT_MILESTONE_HIT_SIZE : MILESTONE_HIT_SIZE
 }
 
 interface ActiveMilestone {
@@ -153,15 +240,27 @@ function onLegendPhaseClick(phaseKey: string) {
           class="rollout-timeline__labels flex-shrink-0 w-140 sm:w-220"
           :style="{ paddingTop: `${AXIS_HEIGHT}px` }"
         >
-          <div
-            v-for="row in rows"
-            :key="row.posten"
-            class="truncate text-xs sm:text-sm pr-10"
-            :style="{ height: `${ROW_HEIGHT}px`, lineHeight: `${ROW_HEIGHT}px` }"
-            :title="row.label"
+          <template
+            v-for="item in lineItems"
+            :key="item.key"
           >
-            {{ row.label }}
-          </div>
+            <div
+              v-if="item.type === 'header'"
+              class="rollout-timeline__lane-header truncate text-[11px] font-bold uppercase tracking-wide text-primary-700 pr-10"
+              :style="{ height: `${GROUP_HEADER_HEIGHT}px`, lineHeight: `${GROUP_HEADER_HEIGHT}px` }"
+              :title="`${item.group.title} (${item.group.count})`"
+            >
+              {{ item.group.title }} ({{ item.group.count }})
+            </div>
+            <div
+              v-else
+              class="truncate text-xs sm:text-sm pr-10"
+              :style="{ height: `${ROW_HEIGHT}px`, lineHeight: `${ROW_HEIGHT}px` }"
+              :title="item.row.label"
+            >
+              {{ item.row.label }}
+            </div>
+          </template>
         </div>
 
         <div class="rollout-timeline__scroll relative overflow-x-auto">
@@ -172,6 +271,16 @@ function onLegendPhaseClick(phaseKey: string) {
             aria-label="Zeitstrahl der Umsetzungsphasen je Dienststelle"
             @click="closeMilestone"
           >
+            <rect
+              v-for="group in laneGroups"
+              :key="`wash-${group.key}-${group.startIndex}`"
+              :x="0"
+              :y="group.top"
+              :width="chartWidth"
+              :height="group.height"
+              :class="group.laneFillClass"
+              fill-opacity="0.5"
+            />
             <line
               v-for="tick in ticks"
               :key="`grid-${tick.toISOString()}`"
@@ -192,6 +301,18 @@ function onLegendPhaseClick(phaseKey: string) {
               {{ formatTick(tick) }}
             </text>
 
+            <line
+              v-for="group in laneGroups.slice(1)"
+              :key="`divider-${group.key}-${group.startIndex}`"
+              :x1="0"
+              :x2="chartWidth"
+              :y1="group.top - GROUP_HEADER_HEIGHT"
+              :y2="group.top - GROUP_HEADER_HEIGHT"
+              class="stroke-gray-300"
+              stroke-width="1"
+              stroke-dasharray="4 3"
+            />
+
             <g
               v-for="(row, rowIndex) in rows"
               :key="row.posten"
@@ -209,10 +330,10 @@ function onLegendPhaseClick(phaseKey: string) {
               <rect
                 v-for="milestone in row.milestones"
                 :key="milestone.key"
-                :x="xScale(clampToTimelineStart(milestone.date)) - MILESTONE_SIZE / 2"
-                :y="rowY(rowIndex) + ROW_HEIGHT / 2 - MILESTONE_SIZE / 2"
-                :width="MILESTONE_SIZE"
-                :height="MILESTONE_SIZE"
+                :x="xScale(clampToTimelineStart(milestone.date)) - milestoneSize(row, milestone) / 2"
+                :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneSize(row, milestone) / 2"
+                :width="milestoneSize(row, milestone)"
+                :height="milestoneSize(row, milestone)"
                 rx="2"
                 :class="milestone.colorClass"
                 class="pointer-events-none"
@@ -220,10 +341,10 @@ function onLegendPhaseClick(phaseKey: string) {
               <rect
                 v-for="milestone in row.milestones"
                 :key="`hit-${milestone.key}`"
-                :x="xScale(clampToTimelineStart(milestone.date)) - MILESTONE_HIT_SIZE / 2"
-                :y="rowY(rowIndex) + ROW_HEIGHT / 2 - MILESTONE_HIT_SIZE / 2"
-                :width="MILESTONE_HIT_SIZE"
-                :height="MILESTONE_HIT_SIZE"
+                :x="xScale(clampToTimelineStart(milestone.date)) - milestoneHitSize(row, milestone) / 2"
+                :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneHitSize(row, milestone) / 2"
+                :width="milestoneHitSize(row, milestone)"
+                :height="milestoneHitSize(row, milestone)"
                 fill="transparent"
                 class="cursor-pointer"
                 @click.stop="toggleMilestone(rowIndex, milestone)"
@@ -262,15 +383,28 @@ function onLegendPhaseClick(phaseKey: string) {
           class="rollout-timeline__status flex-shrink-0 w-100 sm:w-140 pl-10"
           :style="{ paddingTop: `${AXIS_HEIGHT}px` }"
         >
-          <div
-            v-for="row in rows"
-            :key="row.posten"
-            class="truncate text-xs sm:text-sm text-primary-600"
-            :style="{ height: `${ROW_HEIGHT}px`, lineHeight: `${ROW_HEIGHT}px` }"
-            :title="row.currentPhaseTitle"
+          <template
+            v-for="item in lineItems"
+            :key="item.key"
           >
-            {{ row.currentPhaseTitle }}
-          </div>
+            <div
+              v-if="item.type === 'header'"
+              :style="{ height: `${GROUP_HEADER_HEIGHT}px` }"
+            />
+            <div
+              v-else
+              class="flex items-center"
+              :style="{ height: `${ROW_HEIGHT}px` }"
+            >
+              <span
+                class="rollout-timeline__status-chip inline-block max-w-full truncate rounded-sm px-5 text-[11px] font-medium"
+                :class="item.row.currentPhaseChipClass"
+                :title="item.row.currentPhaseTitle"
+              >
+                {{ item.row.currentPhaseTitle }}
+              </span>
+            </div>
+          </template>
         </div>
       </div>
     </template>

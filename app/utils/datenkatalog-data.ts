@@ -25,6 +25,9 @@ export const PHASE_DEFINITIONS = [
     title: 'Kontaktiert',
     description: 'Erstkontakt mit Dienststelle',
     colorClass: 'fill-primary-200',
+    legendSwatchClass: 'bg-primary-200',
+    laneFillClass: 'fill-primary-50',
+    chipClass: 'bg-primary-100 text-primary-800',
     detailContent:
       '<p>In der Kontaktphase wird die zuständige Dienststelle erstmalig angesprochen. Ziel ist es, die richtigen Ansprechpersonen zu identifizieren und den weiteren Ablauf abzustimmen.</p>',
   },
@@ -34,6 +37,9 @@ export const PHASE_DEFINITIONS = [
     title: 'Informiert',
     description: 'Über Projekt und Ablauf informiert',
     colorClass: 'fill-primary-300',
+    legendSwatchClass: 'bg-primary-300',
+    laneFillClass: 'fill-primary-50',
+    chipClass: 'bg-primary-100 text-primary-800',
     detailContent:
       '<p>Die Dienststelle wird über Ziele, Nutzen und Ablauf des Datenkatalogs informiert. Dazu gehören Zeitplan, Erwartungen an die Metadatenerfassung sowie unterstützende Materialien.</p>',
   },
@@ -42,7 +48,10 @@ export const PHASE_DEFINITIONS = [
     field: 'status_kick_off',
     title: 'Kick-Off',
     description: 'Kick-Off-Termin durchgeführt',
-    colorClass: 'fill-primary-400',
+    colorClass: 'fill-primary-500',
+    legendSwatchClass: 'bg-primary-500',
+    laneFillClass: 'fill-primary-50',
+    chipClass: 'bg-primary-100 text-primary-800',
     detailContent:
       '<p>Im Kick-off-Termin starten Dienststelle und Projektteam die gemeinsame Umsetzung. Rollen, Verantwortlichkeiten und die nächsten Schritte werden festgelegt.</p>',
   },
@@ -51,7 +60,10 @@ export const PHASE_DEFINITIONS = [
     field: 'status_metadatenerfassung',
     title: 'Beginn Metadatenerfassung',
     description: 'Start der Metadatenerfassung im Katalog',
-    colorClass: 'fill-primary-500',
+    colorClass: 'fill-primary-600',
+    legendSwatchClass: 'bg-primary-600',
+    laneFillClass: 'fill-primary-50',
+    chipClass: 'bg-primary-100 text-primary-800',
     detailContent:
       '<p>Die Dienststelle erfasst die relevanten Metadaten im Kantons-Datenkatalog. Dazu zählen Beschreibungen der Datensätze, Verantwortlichkeiten, Aktualisierungszyklen und ggf. Veröffentlichungsstatus.</p>',
   },
@@ -60,7 +72,10 @@ export const PHASE_DEFINITIONS = [
     field: 'status_review_und_abnahme',
     title: 'Review',
     description: 'Fachliche Prüfung der erfassten Metadaten',
-    colorClass: 'fill-primary-700',
+    colorClass: 'fill-yellow-600',
+    legendSwatchClass: 'bg-yellow-600',
+    laneFillClass: 'fill-yellow-50',
+    chipClass: 'bg-yellow-100 text-yellow-800',
     detailContent:
       '<p>Die erfassten Metadaten werden fachlich geprüft. Feedback wird eingearbeitet, bis die Dienststelle die Inhalte inhaltlich abgenommen hat.</p>',
   },
@@ -69,7 +84,10 @@ export const PHASE_DEFINITIONS = [
     field: 'status_abgeschlossen',
     title: 'Abnahme',
     description: 'Formeller Abschluss der Umsetzung',
-    colorClass: 'fill-primary-900',
+    colorClass: 'fill-purple-600',
+    legendSwatchClass: 'bg-purple-600',
+    laneFillClass: 'fill-purple-50',
+    chipClass: 'bg-purple-100 text-purple-800',
     detailContent:
       '<p>Mit der offiziellen Abnahme ist die Umsetzung für die Dienststelle formell abgeschlossen. Die Metadaten gelten als freigegeben und werden im Datenkatalog entsprechend geführt.</p>',
   },
@@ -79,6 +97,9 @@ export const PHASE_DEFINITIONS = [
   title: string
   description: string
   colorClass: string
+  legendSwatchClass: string
+  laneFillClass: string
+  chipClass: string
   detailContent: string
 }>
 
@@ -170,6 +191,8 @@ export interface TimelineRow {
   sortDate: string
   currentPhaseKey: string
   currentPhaseTitle: string
+  currentPhaseLaneFillClass: string
+  currentPhaseChipClass: string
   milestones: TimelineMilestone[]
   connectorLine: TimelineConnectorLine | null
 }
@@ -189,10 +212,10 @@ function getSortDate(row: DatenkatalogRow): string {
 }
 
 /**
- * Returns the label shown as the current status for a Dienststelle.
+ * Returns the phase definition for the current status shown for a Dienststelle.
  */
-function getCurrentPhaseTitle(lastPhaseKey: string): string {
-  return PHASE_DEFINITIONS.find((phase) => phase.key === lastPhaseKey)!.title
+function getCurrentPhase(lastPhaseKey: string) {
+  return PHASE_DEFINITIONS.find((phase) => phase.key === lastPhaseKey)!
 }
 
 /**
@@ -239,6 +262,7 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
     const abbreviation = getDepartmentAbbreviation(row.departement)
 
     const currentPhaseKey = PHASE_DEFINITIONS[phaseRank].key
+    const currentPhase = getCurrentPhase(currentPhaseKey)
 
     return {
       posten: row.posten,
@@ -247,7 +271,9 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
       phaseRank,
       sortDate: row.status_kick_off ?? getSortDate(row),
       currentPhaseKey,
-      currentPhaseTitle: getCurrentPhaseTitle(currentPhaseKey),
+      currentPhaseTitle: currentPhase.title,
+      currentPhaseLaneFillClass: currentPhase.laneFillClass,
+      currentPhaseChipClass: currentPhase.chipClass,
       milestones,
       connectorLine,
     }
