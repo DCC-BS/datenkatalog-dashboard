@@ -132,6 +132,34 @@ const filteredTimelineRows = computed(() => {
         :selected-phase-key="selectedPhaseKey"
         @select-phase="togglePhaseFilter"
       />
+
+      <div class="my-20 lg:mb-30 xl:pr-220">
+        <h3 class="h3 mb-20 lg:mb-30 scroll-mt-10 xl:pr-140">
+          Anmerkungen zu den Zeitstrahlen
+        </h3>
+        <div class="ck-content hyphens-auto lg:hyphens-none">
+          <p>
+            Der Zeitstrahl zeigt die jeweils zuletzt erreichte Phase einer Dienststelle.
+            Endet der Zeitstrahl vor der letzten Projektphase, bedeutet dies nicht zwingend
+            eine Verzögerung. Der Rollout erfolgt in enger Abstimmung mit den Dienststellen
+            und orientiert sich an deren zeitlichen und organisatorischen Möglichkeiten.
+            Pausen zwischen einzelnen Phasen können beispielsweise durch unterschiedliche
+            Prioritäten, personelle Veränderungen, laufende Projekte oder einen erhöhten
+            Abstimmungs- und Bearbeitungsaufwand entstehen.
+          </p>
+          <p>
+            Auch der Umfang der zu erfassenden Metadaten unterscheidet sich je nach
+            Dienststelle teilweise erheblich und beeinflusst die Dauer einzelner Phasen.
+            Unterschiede in der Dauer der einzelnen Phasen sind daher Teil des regulären
+            Rollout-Prozesses.
+          </p>
+          <p>
+            Im Zeitstrahl erscheinen nur Dienststellen, mit denen bereits Kontakt
+            aufgenommen wurde. Nicht aufgeführte Dienststellen wurden bisher noch nicht
+            kontaktiert.
+          </p>
+        </div>
+      </div>
     </div>
 
     <div>
