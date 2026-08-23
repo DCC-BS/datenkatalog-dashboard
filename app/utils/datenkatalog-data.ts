@@ -115,6 +115,18 @@ export function buildKpisFromRows(rows: DatenkatalogRow[]): DatenkatalogKpi[] {
   }))
 }
 
+export const TIMELINE_START_DATE = '2025-12-01'
+
+/**
+ * Clamps a date to TIMELINE_START_DATE so early milestones/connectors are
+ * visually pinned to the timeline's start instead of stretching it back.
+ */
+export function clampToTimelineStart(date: string | Date): Date {
+  const parsed = new Date(date)
+  const start = new Date(TIMELINE_START_DATE)
+  return parsed.getTime() < start.getTime() ? start : parsed
+}
+
 export interface TimelineMilestone {
   key: string
   title: string

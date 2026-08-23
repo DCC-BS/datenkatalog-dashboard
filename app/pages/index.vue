@@ -108,8 +108,8 @@ const filteredTimelineRows = computed(() => {
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Übersicht der erreichten Termine je laufender Dienststelle und Phase, von
-            Erstkontakt bis heute.
+            Übersicht der erreichten Termine je laufender Dienststelle und Phase, ab
+            Dezember 2025 bis heute.
           </p>
         </div>
       </div>

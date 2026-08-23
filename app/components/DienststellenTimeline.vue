@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import * as d3 from 'd3'
-import { PHASE_DEFINITIONS, type TimelineMilestone, type TimelineRow } from '~/utils/datenkatalog-data'
+import {
+  clampToTimelineStart,
+  PHASE_DEFINITIONS,
+  TIMELINE_START_DATE,
+  type TimelineMilestone,
+  type TimelineRow,
+} from '~/utils/datenkatalog-data'
 
 const props = defineProps<{
   rows: TimelineRow[]
@@ -23,13 +29,16 @@ const today = new Date()
 const formatDate = d3.timeFormat('%d.%m.%Y')
 const formatTick = d3.timeFormat('%m.%Y')
 
+const timelineStart = new Date(TIMELINE_START_DATE)
+
 const timeDomain = computed<[Date, Date]>(() => {
   const dates = props.rows.flatMap((row) => row.milestones.map((milestone) => new Date(milestone.date)))
   if (dates.length === 0) {
-    return [today, today]
+    return [timelineStart, today]
   }
   const earliest = new Date(Math.min(...dates.map((date) => date.getTime())))
-  return [new Date(earliest.getTime() - 7 * DAY_MS), new Date(today.getTime() + 7 * DAY_MS)]
+  const domainStart = new Date(Math.max(earliest.getTime() - 7 * DAY_MS, timelineStart.getTime()))
+  return [domainStart, new Date(today.getTime() + 7 * DAY_MS)]
 })
 
 const chartWidth = computed(() => {
@@ -84,7 +93,7 @@ function toggleMilestone(rowIndex: number, milestone: TimelineMilestone) {
   activeMilestone.value = {
     rowIndex,
     key: milestone.key,
-    x: xScale.value(new Date(milestone.date)),
+    x: xScale.value(clampToTimelineStart(milestone.date)),
     y: rowY(rowIndex) + ROW_HEIGHT / 2,
     title: milestone.title,
     date: milestone.date,
@@ -189,8 +198,8 @@ function onLegendPhaseClick(phaseKey: string) {
             >
               <line
                 v-if="row.connectorLine"
-                :x1="xScale(new Date(row.connectorLine.start))"
-                :x2="xScale(new Date(row.connectorLine.end))"
+                :x1="xScale(clampToTimelineStart(row.connectorLine.start))"
+                :x2="xScale(clampToTimelineStart(row.connectorLine.end))"
                 :y1="rowY(rowIndex) + ROW_HEIGHT / 2"
                 :y2="rowY(rowIndex) + ROW_HEIGHT / 2"
                 class="stroke-gray-400"
@@ -200,7 +209,7 @@ function onLegendPhaseClick(phaseKey: string) {
               <rect
                 v-for="milestone in row.milestones"
                 :key="milestone.key"
-                :x="xScale(new Date(milestone.date)) - MILESTONE_SIZE / 2"
+                :x="xScale(clampToTimelineStart(milestone.date)) - MILESTONE_SIZE / 2"
                 :y="rowY(rowIndex) + ROW_HEIGHT / 2 - MILESTONE_SIZE / 2"
                 :width="MILESTONE_SIZE"
                 :height="MILESTONE_SIZE"
@@ -211,7 +220,7 @@ function onLegendPhaseClick(phaseKey: string) {
               <rect
                 v-for="milestone in row.milestones"
                 :key="`hit-${milestone.key}`"
-                :x="xScale(new Date(milestone.date)) - MILESTONE_HIT_SIZE / 2"
+                :x="xScale(clampToTimelineStart(milestone.date)) - MILESTONE_HIT_SIZE / 2"
                 :y="rowY(rowIndex) + ROW_HEIGHT / 2 - MILESTONE_HIT_SIZE / 2"
                 :width="MILESTONE_HIT_SIZE"
                 :height="MILESTONE_HIT_SIZE"
