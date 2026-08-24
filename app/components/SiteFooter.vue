@@ -2,6 +2,9 @@
 import { withBase } from 'ufo'
 
 const githubIconSrc = withBase('/icons/github-mark.svg', useRuntimeConfig().app.baseURL)
+
+const EXTERNAL_LINK_HINT =
+  'Externer Link, wird in einem neuen Tab oder Fenster geöffnet'
 </script>
 
 <template>
@@ -22,6 +25,7 @@ const githubIconSrc = withBase('/icons/github-mark.svg', useRuntimeConfig().app.
               rel="noopener noreferrer"
             >
               Statistisches Amt
+              <span class="sr-only">{{ EXTERNAL_LINK_HINT }}</span>
             </a>
           </li>
           <li>
@@ -32,6 +36,7 @@ const githubIconSrc = withBase('/icons/github-mark.svg', useRuntimeConfig().app.
               rel="noopener noreferrer"
             >
               DCC Data Competence Center
+              <span class="sr-only">{{ EXTERNAL_LINK_HINT }}</span>
             </a>
           </li>
           <li>
@@ -42,6 +47,7 @@ const githubIconSrc = withBase('/icons/github-mark.svg', useRuntimeConfig().app.
               rel="noopener noreferrer"
             >
               Link zur Datenquelle
+              <span class="sr-only">{{ EXTERNAL_LINK_HINT }}</span>
             </a>
           </li>
           <li>
@@ -52,6 +58,7 @@ const githubIconSrc = withBase('/icons/github-mark.svg', useRuntimeConfig().app.
               rel="noopener noreferrer"
             >
               Code auf Github
+              <span class="sr-only">{{ EXTERNAL_LINK_HINT }}</span>
               <img
                 :src="githubIconSrc"
                 alt=""
@@ -66,10 +73,26 @@ const githubIconSrc = withBase('/icons/github-mark.svg', useRuntimeConfig().app.
       <nav aria-label="Metadatenmenü">
         <ul class="links links--spaced">
           <li>
-            <a class="link link--tall" href="https://www.bs.ch/" target="_blank">Startseite</a>
+            <a
+              class="link link--tall"
+              href="https://www.bs.ch/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Startseite
+              <span class="sr-only">{{ EXTERNAL_LINK_HINT }}</span>
+            </a>
           </li>
           <li>
-            <a class="link link--tall" href="https://www.bs.ch/datenschutzerklaerung" target="_blank">Datenschutz</a>
+            <a
+              class="link link--tall"
+              href="https://www.bs.ch/datenschutzerklaerung"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Datenschutz
+              <span class="sr-only">{{ EXTERNAL_LINK_HINT }}</span>
+            </a>
           </li>
           <!--
           <li>
