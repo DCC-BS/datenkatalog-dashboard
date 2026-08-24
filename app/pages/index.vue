@@ -113,7 +113,7 @@ const filteredTimelineRows = computed(() => {
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
             Übersicht der erreichten Termine je laufender Dienststelle und Phase, ab
-            Dezember 2025 bis heute.
+            Dezember 2025 bis heute. Zum Filtern auf die Legende klicken.
           </p>
         </div>
       </div>
