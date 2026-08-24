@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { buildTimelineRows } from '~/utils/datenkatalog-data'
+import { buildTimelineRows, formatDatenstand } from '~/utils/datenkatalog-data'
 
 useHead({
   title: 'Datenkatalog – Umsetzungsstand | Kanton Basel-Stadt',
@@ -9,6 +9,10 @@ const { data, pending, error } = await useDatenkatalogData()
 
 const kpis = computed(() => data.value?.kpis ?? [])
 const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
+const datenstand = computed(() => {
+  const isoDate = data.value?.dataProcessedDate
+  return isoDate ? formatDatenstand(isoDate) : null
+})
 
 /** null = show all; otherwise only Dienststellen currently in that phase */
 const selectedPhaseKey = ref<string | null>(null)
@@ -130,6 +134,7 @@ const filteredTimelineRows = computed(() => {
         v-else
         :rows="filteredTimelineRows"
         :selected-phase-key="selectedPhaseKey"
+        :datenstand="datenstand"
         @select-phase="togglePhaseFilter"
       />
 

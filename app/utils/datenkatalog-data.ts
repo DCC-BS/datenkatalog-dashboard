@@ -150,6 +150,40 @@ export function normalizeDatenkatalogRows(data: unknown): DatenkatalogRow[] {
   return data.filter(isDatenkatalogRow)
 }
 
+/**
+ * Reads `metas.default.data_processed` from an ODS catalog dataset response
+ * (e.g. `GET /catalog/datasets/{id}`). Returns the raw ISO datetime string, or
+ * null if the field is missing or the response has an unexpected shape.
+ */
+export function extractDataProcessedDate(catalogResponse: unknown): string | null {
+  if (!catalogResponse || typeof catalogResponse !== 'object') {
+    return null
+  }
+  const metas = (catalogResponse as Record<string, unknown>).metas
+  if (!metas || typeof metas !== 'object') {
+    return null
+  }
+  const defaultMetas = (metas as Record<string, unknown>).default
+  if (!defaultMetas || typeof defaultMetas !== 'object') {
+    return null
+  }
+  const dataProcessed = (defaultMetas as Record<string, unknown>).data_processed
+  return typeof dataProcessed === 'string' && dataProcessed.trim() !== '' ? dataProcessed : null
+}
+
+/**
+ * Formats an ISO datetime string's date part (YYYY-MM-DD prefix) as
+ * DD.MM.YYYY, without applying any timezone conversion.
+ */
+export function formatDatenstand(isoDateTime: string): string | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDateTime)
+  if (!match) {
+    return null
+  }
+  const [, year, month, day] = match
+  return `${day}.${month}.${year}`
+}
+
 export function buildKpisFromRows(rows: DatenkatalogRow[]): DatenkatalogKpi[] {
   return PHASE_DEFINITIONS.map((phase) => ({
     key: phase.key,

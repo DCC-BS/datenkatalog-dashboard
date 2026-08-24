@@ -11,6 +11,7 @@ import {
 const props = defineProps<{
   rows: TimelineRow[]
   selectedPhaseKey?: string | null
+  datenstand?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -407,6 +408,13 @@ function onLegendPhaseClick(phaseKey: string) {
           </template>
         </div>
       </div>
+
+      <p
+        v-if="datenstand"
+        class="rollout-timeline__datenstand text-xs text-gray-500 mt-10"
+      >
+        Stand: {{ datenstand }}
+      </p>
     </template>
   </div>
 </template>
