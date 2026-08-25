@@ -185,11 +185,15 @@ export function formatDatenstand(isoDateTime: string): string | null {
 }
 
 export function buildKpisFromRows(rows: DatenkatalogRow[]): DatenkatalogKpi[] {
-  return PHASE_DEFINITIONS.map((phase) => ({
+  return PHASE_DEFINITIONS.map((phase, phaseIndex) => ({
     key: phase.key,
     title: phase.title,
     description: phase.description,
-    count: rows.filter((row) => hasPhaseValue(row[phase.field])).length,
+    count: rows.filter((row) =>
+      PHASE_DEFINITIONS.slice(phaseIndex).some((laterPhase) =>
+        hasPhaseValue(row[laterPhase.field]),
+      ),
+    ).length,
   }))
 }
 
