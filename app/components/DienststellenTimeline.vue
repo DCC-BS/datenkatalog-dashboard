@@ -156,12 +156,9 @@ function milestoneHitSize(row: TimelineRow, milestone: TimelineMilestone) {
 }
 
 interface ActiveMilestone {
-  rowIndex: number
-  key: string
-  x: number
-  y: number
-  title: string
-  date: string
+  left: number
+  top: number
+  items: TimelineMilestone[]
 }
 
 const activeMilestone = ref<ActiveMilestone | null>(null)
@@ -173,22 +170,27 @@ watch(
   },
 )
 
-function toggleMilestone(rowIndex: number, milestone: TimelineMilestone) {
-  if (activeMilestone.value?.rowIndex === rowIndex && activeMilestone.value?.key === milestone.key) {
-    activeMilestone.value = null
-    return
-  }
+function milestonesOnSameDate(row: TimelineRow, milestone: TimelineMilestone) {
+  return row.milestones.filter((candidate) => candidate.date === milestone.date)
+}
+
+function milestoneTitleText(milestones: TimelineMilestone[]) {
+  return milestones
+    .map((milestone) => `${milestone.title}: ${formatDate(new Date(milestone.date))}`)
+    .join('\n')
+}
+
+function showMilestone(event: PointerEvent, row: TimelineRow, milestone: TimelineMilestone) {
+  const target = event.currentTarget as SVGRectElement
+  const rect = target.getBoundingClientRect()
   activeMilestone.value = {
-    rowIndex,
-    key: milestone.key,
-    x: xScale.value(clampToTimelineStart(milestone.date)),
-    y: rowY(rowIndex) + ROW_HEIGHT / 2,
-    title: milestone.title,
-    date: milestone.date,
+    left: rect.left + rect.width / 2,
+    top: rect.top,
+    items: milestonesOnSameDate(row, milestone),
   }
 }
 
-function closeMilestone() {
+function hideMilestone() {
   activeMilestone.value = null
 }
 
@@ -264,13 +266,15 @@ function onLegendPhaseClick(phaseKey: string) {
           </template>
         </div>
 
-        <div class="rollout-timeline__scroll relative overflow-x-auto">
+        <div
+          class="rollout-timeline__scroll relative overflow-x-auto"
+          @scroll="hideMilestone"
+        >
           <svg
             :width="chartWidth"
             :height="chartHeight"
             role="img"
             aria-label="Zeitstrahl der Umsetzungsphasen je Dienststelle"
-            @click="closeMilestone"
           >
             <rect
               v-for="group in laneGroups"
@@ -347,9 +351,11 @@ function onLegendPhaseClick(phaseKey: string) {
                 :width="milestoneHitSize(row, milestone)"
                 :height="milestoneHitSize(row, milestone)"
                 fill="transparent"
-                class="cursor-pointer"
-                @click.stop="toggleMilestone(rowIndex, milestone)"
-              />
+                @pointerenter="showMilestone($event, row, milestone)"
+                @pointerleave="hideMilestone"
+              >
+                <title>{{ milestoneTitleText(milestonesOnSameDate(row, milestone)) }}</title>
+              </rect>
             </g>
 
             <line
@@ -372,11 +378,17 @@ function onLegendPhaseClick(phaseKey: string) {
 
           <div
             v-if="activeMilestone"
-            class="rollout-timeline__tooltip absolute bg-white border border-gray-300 rounded text-xs px-10 py-5 shadow-md"
-            :style="{ left: `${activeMilestone.x}px`, top: `${activeMilestone.y}px` }"
+            class="rollout-timeline__tooltip fixed bg-white border border-gray-300 rounded text-xs px-10 py-5 shadow-md"
+            :style="{ left: `${activeMilestone.left}px`, top: `${activeMilestone.top}px` }"
           >
-            <strong>{{ activeMilestone.title }}</strong>
-            <div>{{ formatDate(new Date(activeMilestone.date)) }}</div>
+            <div
+              v-for="(item, index) in activeMilestone.items"
+              :key="item.key"
+              :class="{ 'mt-5': index > 0 }"
+            >
+              <strong>{{ item.title }}</strong>
+              <div>{{ formatDate(new Date(item.date)) }}</div>
+            </div>
           </div>
         </div>
 
@@ -432,6 +444,7 @@ function onLegendPhaseClick(phaseKey: string) {
 .rollout-timeline__tooltip {
   transform: translate(-50%, -130%);
   white-space: nowrap;
+  pointer-events: none;
   z-index: 10;
 }
 
