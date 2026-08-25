@@ -63,7 +63,7 @@ const filteredTimelineRows = computed(() => {
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Anzahl Dienststellen pro Phase.
+            Anzahl der Dienststellen, die mindestens die jeweilige Phase erreicht haben.
           </p>
         </div>
       </div>
@@ -113,7 +113,8 @@ const filteredTimelineRows = computed(() => {
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
             Übersicht der erreichten Termine je laufender Dienststelle und Phase, ab
-            Dezember 2025 bis heute. Zum Filtern auf die Legende klicken.
+            Dezember 2025 bis heute. Durch Klicken auf eine Phase in der Legende werden
+			die Dienststellen nach ihrer aktuell laufenden Phase gefiltert.
           </p>
         </div>
       </div>
