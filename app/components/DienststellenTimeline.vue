@@ -33,6 +33,18 @@ const YEAR_SCROLL_LEAD_IN = 12
 
 const today = new Date()
 const formatDate = d3.timeFormat('%d.%m.%Y')
+
+/**
+ * Formats a milestone date for hover display, collapsing any date before
+ * TIMELINE_START_DATE to "vor 01.12.2025" instead of the real date.
+ */
+function formatHoverDate(date: Date): string {
+  const start = new Date(TIMELINE_START_DATE)
+  if (date.getTime() < start.getTime()) {
+    return 'vor 01.12.2025'
+  }
+  return formatDate(date)
+}
 const GERMAN_MONTHS = [
   'Januar',
   'Februar',
@@ -247,7 +259,7 @@ function milestonesOnSameDate(row: TimelineRow, milestone: TimelineMilestone) {
 
 function milestoneTitleText(milestones: TimelineMilestone[]) {
   return milestones
-    .map((milestone) => `${milestone.title}: ${formatDate(new Date(milestone.date))}`)
+    .map((milestone) => `${milestone.title}: ${formatHoverDate(new Date(milestone.date))}`)
     .join('\n')
 }
 
@@ -523,7 +535,7 @@ function onLegendPhaseClick(phaseKey: string) {
               :class="{ 'mt-5': index > 0 }"
             >
               <strong>{{ item.title }}</strong>
-              <div>{{ formatDate(new Date(item.date)) }}</div>
+              <div>{{ formatHoverDate(new Date(item.date)) }}</div>
             </div>
           </div>
         </div>
