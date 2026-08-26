@@ -33,7 +33,23 @@ const YEAR_SCROLL_LEAD_IN = 12
 
 const today = new Date()
 const formatDate = d3.timeFormat('%d.%m.%Y')
-const formatTick = d3.timeFormat('%m.%Y')
+const GERMAN_MONTHS = [
+  'Januar',
+  'Februar',
+  'März',
+  'April',
+  'Mai',
+  'Juni',
+  'Juli',
+  'August',
+  'September',
+  'Oktober',
+  'November',
+  'Dezember',
+] as const
+function formatTick(date: Date): string {
+  return `${GERMAN_MONTHS[date.getMonth()]} ${date.getFullYear()}`
+}
 
 const timelineStart = new Date(TIMELINE_START_DATE)
 
