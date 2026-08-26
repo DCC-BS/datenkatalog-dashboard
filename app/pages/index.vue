@@ -194,7 +194,7 @@ const filteredTimelineRows = computed(() => {
             Rollout-Prozesses.
           </p>
           <p>
-            Im Zeitstrahl erscheinen nur Dienststellen, mit denen bereits Kontakt
+            Im Dashboard erscheinen nur Dienststellen, mit denen bereits Kontakt
             aufgenommen wurde. Nicht aufgeführte Dienststellen wurden bisher noch nicht
             kontaktiert.
           </p>
