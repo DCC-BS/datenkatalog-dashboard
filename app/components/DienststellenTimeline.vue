@@ -171,6 +171,12 @@ interface ActiveMilestone {
 const activeMilestone = ref<ActiveMilestone | null>(null)
 const scrollEl = ref<HTMLElement | null>(null)
 
+/** Mouse grab-to-pan; touch/trackpad keep native overflow scrolling. */
+const isDragging = ref(false)
+let dragPointerId: number | null = null
+let dragStartX = 0
+let dragStartScrollLeft = 0
+
 watch(
   () => props.rows,
   () => {
@@ -241,6 +247,41 @@ function showMilestone(event: PointerEvent, row: TimelineRow, milestone: Timelin
 
 function hideMilestone() {
   activeMilestone.value = null
+}
+
+function onScrollPointerDown(event: PointerEvent) {
+  if (event.pointerType !== 'mouse' || event.button !== 0) {
+    return
+  }
+  const el = scrollEl.value
+  if (!el) {
+    return
+  }
+  event.preventDefault()
+  isDragging.value = true
+  dragPointerId = event.pointerId
+  dragStartX = event.clientX
+  dragStartScrollLeft = el.scrollLeft
+  el.setPointerCapture(event.pointerId)
+}
+
+function onScrollPointerMove(event: PointerEvent) {
+  if (!isDragging.value || event.pointerId !== dragPointerId) {
+    return
+  }
+  const el = scrollEl.value
+  if (!el) {
+    return
+  }
+  el.scrollLeft = dragStartScrollLeft - (event.clientX - dragStartX)
+}
+
+function endScrollDrag(event: PointerEvent) {
+  if (event.pointerId !== dragPointerId) {
+    return
+  }
+  isDragging.value = false
+  dragPointerId = null
 }
 
 function onLegendPhaseClick(phaseKey: string) {
@@ -341,7 +382,13 @@ function onLegendPhaseClick(phaseKey: string) {
         <div
           ref="scrollEl"
           class="rollout-timeline__scroll relative overflow-x-auto"
+          :class="{ 'rollout-timeline__scroll--dragging': isDragging }"
           @scroll="hideMilestone"
+          @pointerdown="onScrollPointerDown"
+          @pointermove="onScrollPointerMove"
+          @pointerup="endScrollDrag"
+          @pointercancel="endScrollDrag"
+          @lostpointercapture="endScrollDrag"
         >
           <svg
             :width="chartWidth"
@@ -507,6 +554,12 @@ function onLegendPhaseClick(phaseKey: string) {
 <style scoped>
 .rollout-timeline__scroll {
   scrollbar-width: thin;
+  cursor: grab;
+}
+
+.rollout-timeline__scroll--dragging {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .rollout-timeline__tooltip {
