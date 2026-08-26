@@ -162,6 +162,7 @@ interface ActiveMilestone {
 }
 
 const activeMilestone = ref<ActiveMilestone | null>(null)
+const scrollEl = ref<HTMLElement | null>(null)
 
 watch(
   () => props.rows,
@@ -169,6 +170,28 @@ watch(
     activeMilestone.value = null
   },
 )
+
+/** Match former RTL default: open scrolled to the right edge (near Heute). */
+function scrollTimelineToEnd() {
+  const el = scrollEl.value
+  if (!el) {
+    return
+  }
+  el.scrollLeft = el.scrollWidth - el.clientWidth
+}
+
+async function syncScrollToEnd() {
+  await nextTick()
+  scrollTimelineToEnd()
+}
+
+onMounted(() => {
+  syncScrollToEnd()
+})
+
+watch([chartWidth, () => props.rows.length], () => {
+  syncScrollToEnd()
+})
 
 function milestonesOnSameDate(row: TimelineRow, milestone: TimelineMilestone) {
   return row.milestones.filter((candidate) => candidate.date === milestone.date)
@@ -267,6 +290,7 @@ function onLegendPhaseClick(phaseKey: string) {
         </div>
 
         <div
+          ref="scrollEl"
           class="rollout-timeline__scroll relative overflow-x-auto"
           @scroll="hideMilestone"
         >
@@ -434,11 +458,6 @@ function onLegendPhaseClick(phaseKey: string) {
 <style scoped>
 .rollout-timeline__scroll {
   scrollbar-width: thin;
-  direction: rtl;
-}
-
-.rollout-timeline__scroll > * {
-  direction: ltr;
 }
 
 .rollout-timeline__tooltip {
