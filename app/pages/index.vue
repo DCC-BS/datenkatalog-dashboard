@@ -56,17 +56,22 @@ const filteredTimelineRows = computed(() => {
       Datenkatalog – Umsetzungsstand
     </h1>
     <p class="lead mt-30 hyphens-auto lg:hyphens-none text-pretty">
-      Fortschritt bei der Einführung des Kantons-Datenkatalogs pro Dienststelle – von
+      Fortschritt bei der Einführung des Kantonalen Datenkatalogs pro Dienststelle – von
       Kontaktiert bis Abnahme.
     </p>
 
     <div class="my-20 lg:mb-30 xl:pr-220">
       <div class="ck-content hyphens-auto lg:hyphens-none">
         <p>
-          Dieses Dashboard gibt einen Überblick über den Rollout des Datenkatalogs im Kanton
-          Basel-Stadt. Für jede Dienststelle wird sichtbar, in welcher Phase sich die
+          Dieses Dashboard gibt einen Überblick über den Rollout des Datenkatalogs
+          im Kanton Basel-Stadt.
+          Für jede Dienststelle wird sichtbar, in welcher Phase sich die
           Umsetzung befindet: Kontaktiert, Informiert, Kick-Off, Beginn Metadatenerfassung,
           Review und Abnahme.
+          Weitere Informationen über den
+          <a href="https://datenkatalog.bs.ch" target="_blank" rel="noopener noreferrer">Kantonalen Datenkatalog</a>
+          finden Sie
+          <a href="https://www.bs.ch/schwerpunkte/daten/databs/schwerpunkte/datenkatalog" target="_blank" rel="noopener noreferrer">hier</a>.
         </p>
         <p>
           Die Kennzahlen unten zeigen, wie viele Dienststellen die jeweilige Phase bereits
