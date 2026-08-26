@@ -27,6 +27,8 @@ const GROUP_HEADER_HEIGHT = 24
 const AXIS_HEIGHT = 28
 const PX_PER_DAY = 6
 const MIN_CHART_WIDTH = 480
+const EDGE_ARROW_INSET = 4
+const EDGE_ARROW_SIZE = 7
 const DAY_MS = 24 * 60 * 60 * 1000
 /** Keeps the year boundary off the viewport edge when jumping to a year. */
 const YEAR_SCROLL_LEAD_IN = 12
@@ -205,6 +207,69 @@ let dragPointerId: number | null = null
 let dragStartX = 0
 let dragStartScrollLeft = 0
 
+/** Visible scroll window, used to detect rows whose milestones are fully out of view. */
+const scrollLeft = ref(0)
+const viewportWidth = ref(0)
+let resizeObserver: ResizeObserver | null = null
+
+function updateViewportMetrics() {
+  const el = scrollEl.value
+  if (!el) {
+    return
+  }
+  scrollLeft.value = el.scrollLeft
+  viewportWidth.value = el.clientWidth
+}
+
+interface EdgeArrow {
+  key: string
+  side: 'left' | 'right'
+  y: number
+  colorClass: string
+}
+
+/**
+ * At most one arrow per row: shown only when a row's entire milestone span
+ * (first to last) is scrolled fully out of view on one side, pointing the
+ * user toward it. Colored after the milestone nearer to the viewport.
+ */
+const edgeArrows = computed<EdgeArrow[]>(() => {
+  if (viewportWidth.value <= 0) {
+    return []
+  }
+  const viewLeft = scrollLeft.value
+  const viewRight = scrollLeft.value + viewportWidth.value
+  const arrows: EdgeArrow[] = []
+  props.rows.forEach((row, rowIndex) => {
+    if (row.milestones.length === 0) {
+      return
+    }
+    const firstMilestone = row.milestones[0]!
+    const lastMilestone = row.milestones[row.milestones.length - 1]!
+    const firstX = xScale.value(clampToTimelineStart(firstMilestone.date))
+    const lastX = xScale.value(clampToTimelineStart(lastMilestone.date))
+    const y = rowY(rowIndex) + ROW_HEIGHT / 2
+    if (lastX < viewLeft) {
+      arrows.push({ key: `${row.posten}-left`, side: 'left', y, colorClass: lastMilestone.colorClass })
+    } else if (firstX > viewRight) {
+      arrows.push({ key: `${row.posten}-right`, side: 'right', y, colorClass: firstMilestone.colorClass })
+    }
+  })
+  return arrows
+})
+
+function arrowPoints(arrow: EdgeArrow) {
+  const { side, y } = arrow
+  if (side === 'left') {
+    const tipX = EDGE_ARROW_INSET
+    const baseX = tipX + EDGE_ARROW_SIZE
+    return `${tipX},${y} ${baseX},${y - EDGE_ARROW_SIZE} ${baseX},${y + EDGE_ARROW_SIZE}`
+  }
+  const tipX = viewportWidth.value - EDGE_ARROW_INSET
+  const baseX = tipX - EDGE_ARROW_SIZE
+  return `${tipX},${y} ${baseX},${y - EDGE_ARROW_SIZE} ${baseX},${y + EDGE_ARROW_SIZE}`
+}
+
 watch(
   () => props.rows,
   () => {
@@ -226,8 +291,18 @@ async function syncScrollToEnd() {
   scrollTimelineToEnd()
 }
 
-onMounted(() => {
-  syncScrollToEnd()
+onMounted(async () => {
+  await syncScrollToEnd()
+  updateViewportMetrics()
+  const el = scrollEl.value
+  if (el) {
+    resizeObserver = new ResizeObserver(updateViewportMetrics)
+    resizeObserver.observe(el)
+  }
+})
+
+onUnmounted(() => {
+  resizeObserver?.disconnect()
 })
 
 function scrollTimelineTo(left: number) {
@@ -275,6 +350,11 @@ function showMilestone(event: PointerEvent, row: TimelineRow, milestone: Timelin
 
 function hideMilestone() {
   activeMilestone.value = null
+}
+
+function onTimelineScroll() {
+  hideMilestone()
+  updateViewportMetrics()
 }
 
 function onScrollPointerDown(event: PointerEvent) {
@@ -411,7 +491,7 @@ function onLegendPhaseClick(phaseKey: string) {
           ref="scrollEl"
           class="rollout-timeline__scroll relative overflow-x-auto"
           :class="{ 'rollout-timeline__scroll--dragging': isDragging }"
-          @scroll="hideMilestone"
+          @scroll="onTimelineScroll"
           @pointerdown="onScrollPointerDown"
           @pointermove="onScrollPointerMove"
           @pointerup="endScrollDrag"
@@ -524,6 +604,22 @@ function onLegendPhaseClick(phaseKey: string) {
             </text>
           </svg>
 
+          <svg
+            v-if="edgeArrows.length > 0"
+            class="rollout-timeline__edge-arrows"
+            :width="viewportWidth"
+            :height="chartHeight"
+            :style="{ left: `${scrollLeft}px` }"
+            aria-hidden="true"
+          >
+            <polygon
+              v-for="arrow in edgeArrows"
+              :key="arrow.key"
+              :points="arrowPoints(arrow)"
+              :class="arrow.colorClass"
+            />
+          </svg>
+
           <div
             v-if="activeMilestone"
             class="rollout-timeline__tooltip fixed bg-white border border-gray-300 rounded text-xs px-10 py-5 shadow-md"
@@ -595,6 +691,13 @@ function onLegendPhaseClick(phaseKey: string) {
   white-space: nowrap;
   pointer-events: none;
   z-index: 10;
+}
+
+.rollout-timeline__edge-arrows {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  z-index: 5;
 }
 
 .rollout-timeline__legend-item {
