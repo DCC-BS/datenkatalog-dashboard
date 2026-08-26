@@ -1,12 +1,9 @@
 export default defineAppConfig({
   dashboard: {
-    showNavBar: true,
+    showNavBar: false,
     logoHref: 'https://www.bs.ch',
     aboutLink: 'https://www.bs.ch/schwerpunkte/daten/databs/schwerpunkte/datenkatalog',
     aboutLabel: 'Über uns',
-    navItems: [
-      { to: '/', label: 'Start', exact: true },
-    ],
     footer: {
       contactLinks: [
         { href: 'https://www.bs.ch/pd/statistik', label: 'Statistisches Amt' },
