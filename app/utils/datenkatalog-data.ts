@@ -103,16 +103,6 @@ export const PHASE_DEFINITIONS = [
   detailContent: string
 }>
 
-export interface PhaseInfoItem {
-  title: string
-  content: string
-}
-
-export const PHASE_INFO_ITEMS: PhaseInfoItem[] = PHASE_DEFINITIONS.map((phase) => ({
-  title: `Phase: ${phase.title}`,
-  content: phase.detailContent,
-}))
-
 const DEPARTMENT_ABBREVIATIONS: Record<string, string> = {
   'Präsidialdepartement': 'PD',
   'Erziehungsdepartement': 'ED',

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { buildTimelineRows, formatDatenstand } from '~/utils/datenkatalog-data'
+import IconSymbolInfoI from '@kanton-basel-stadt/designsystem/icons/symbol/info-i'
+import { buildTimelineRows, formatDatenstand, PHASE_DEFINITIONS } from '~/utils/datenkatalog-data'
 
 useHead({
   title: 'Datenkatalog – Umsetzungsstand | Kanton Basel-Stadt',
@@ -19,6 +20,25 @@ const selectedPhaseKey = ref<string | null>(null)
 
 function togglePhaseFilter(phaseKey: string) {
   selectedPhaseKey.value = selectedPhaseKey.value === phaseKey ? null : phaseKey
+}
+
+/** Phase whose definition overlay is currently open, or null when closed. */
+const infoPhaseKey = ref<string | null>(null)
+
+const infoPhase = computed(() => {
+  const phaseKey = infoPhaseKey.value
+  if (!phaseKey) {
+    return null
+  }
+  return PHASE_DEFINITIONS.find((phase) => phase.key === phaseKey) ?? null
+})
+
+function openPhaseInfo(phaseKey: string) {
+  infoPhaseKey.value = phaseKey
+}
+
+function closePhaseInfo() {
+  infoPhaseKey.value = null
 }
 
 const filteredTimelineRows = computed(() => {
@@ -84,26 +104,40 @@ const filteredTimelineRows = computed(() => {
         v-else
         class="grid grid-cols-2 lg:grid-cols-3 gap-20"
       >
-        <KPICard
+        <div
           v-for="kpi in kpis"
           :key="kpi.key"
-          :title="kpi.title"
-          :description="kpi.description"
-          :value="kpi.count"
-          class="phase-filter-control"
-          :class="{
-            'phase-filter-control--selected': selectedPhaseKey === kpi.key,
-            'phase-filter-control--dimmed': selectedPhaseKey != null && selectedPhaseKey !== kpi.key,
-          }"
-          role="button"
-          tabindex="0"
-          :aria-pressed="selectedPhaseKey === kpi.key"
-          @click="togglePhaseFilter(kpi.key)"
-          @keydown.enter.prevent="togglePhaseFilter(kpi.key)"
-          @keydown.space.prevent="togglePhaseFilter(kpi.key)"
-        />
+          class="relative"
+        >
+          <KPICard
+            :title="kpi.title"
+            :description="kpi.description"
+            :value="kpi.count"
+            class="phase-filter-control"
+            :class="{
+              'phase-filter-control--selected': selectedPhaseKey === kpi.key,
+              'phase-filter-control--dimmed': selectedPhaseKey != null && selectedPhaseKey !== kpi.key,
+            }"
+            role="button"
+            tabindex="0"
+            :aria-pressed="selectedPhaseKey === kpi.key"
+            @click="togglePhaseFilter(kpi.key)"
+            @keydown.enter.prevent="togglePhaseFilter(kpi.key)"
+            @keydown.space.prevent="togglePhaseFilter(kpi.key)"
+          />
+          <button
+            type="button"
+            class="kpi-info-trigger absolute top-10 right-10 flex items-center justify-center w-24 h-24 rounded-full"
+            :aria-label="`Definition anzeigen: ${kpi.title}`"
+            @click="openPhaseInfo(kpi.key)"
+          >
+            <component :is="IconSymbolInfoI" aria-hidden="true" class="w-16 h-16" />
+          </button>
+        </div>
       </div>
     </div>
+
+    <PhaseInfoDialog :phase="infoPhase" @close="closePhaseInfo" />
 
     <div>
       <h3 class="h3 mb-20 lg:mb-30 mt-10 md:mt-40 xl:mt-50 scroll-mt-10 xl:pr-140">
@@ -170,20 +204,21 @@ const filteredTimelineRows = computed(() => {
 
     <div>
       <h3 class="h3 mb-20 lg:mb-30 mt-10 md:mt-40 xl:mt-50 scroll-mt-10 xl:pr-140">
-        Weiterführende Informationen
+        Kontakt
       </h3>
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Definitionen der Phasen, Hintergrund zum Datenkatalog und Kontaktangaben finden
-            Sie auf der Info-Seite.
+            Möchten Sie den Rollout Ihrer Dienststelle starten? Melden Sie sich einfach
+            per E-Mail oder rufen Sie uns an:
           </p>
         </div>
       </div>
-      <LinkItem
-        href="/info"
-        title="Weitere Informationen"
-        description="Definitionen der Rollout-Phasen, Erläuterungen zum Datenkatalog und Kontakte."
+      <Contact
+        name="Josephine Smith"
+        description="wissenschaftliche Mitarbeiterin, Data Competence Center"
+        phone="+41 61 267 87 25"
+        email="dcc@bs.ch"
       />
     </div>
   </div>
@@ -201,5 +236,20 @@ const filteredTimelineRows = computed(() => {
 
 .phase-filter-control--dimmed {
   opacity: 0.55;
+}
+
+.kpi-info-trigger {
+  cursor: pointer;
+  color: var(--color-primary-600, #00838f);
+  background: none;
+  border: none;
+}
+
+.kpi-info-trigger:hover {
+  color: var(--color-primary-800, #005662);
+}
+
+:deep(.kpi-card__intro) {
+  padding-right: 28px;
 }
 </style>

@@ -6,7 +6,6 @@ export default defineAppConfig({
     aboutLabel: 'Über uns',
     navItems: [
       { to: '/', label: 'Start', exact: true },
-      { to: '/info', label: 'Info' },
     ],
     footer: {
       contactLinks: [
