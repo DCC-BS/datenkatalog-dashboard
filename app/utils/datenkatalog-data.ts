@@ -187,7 +187,8 @@ export function buildKpisFromRows(rows: DatenkatalogRow[]): DatenkatalogKpi[] {
   }))
 }
 
-export const TIMELINE_START_DATE = '2025-12-01'
+/** Local midnight. A date-only ISO string parses as UTC and skips the Dec month tick in CET. */
+export const TIMELINE_START_DATE = '2025-12-01T00:00:00'
 
 /**
  * Clamps a date to TIMELINE_START_DATE so early milestones/connectors are
