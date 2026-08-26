@@ -102,7 +102,7 @@ const rowTops = computed<number[]>(() => {
     if (isGroupStart) {
       headerCount += 1
     }
-    tops.push(AXIS_HEIGHT + headerCount * GROUP_HEADER_HEIGHT + index * ROW_HEIGHT)
+    tops.push(headerCount * GROUP_HEADER_HEIGHT + index * ROW_HEIGHT)
   })
   return tops
 })
@@ -161,7 +161,7 @@ const lineItems = computed<LineItem[]>(() => {
 
 const chartHeight = computed(() => {
   if (props.rows.length === 0) {
-    return AXIS_HEIGHT
+    return 0
   }
   return rowTops.value[rowTops.value.length - 1]! + ROW_HEIGHT
 })
@@ -181,7 +181,7 @@ const legendItems = computed(() =>
 )
 
 function rowY(rowIndex: number) {
-  return rowTops.value[rowIndex] ?? AXIS_HEIGHT + rowIndex * ROW_HEIGHT
+  return rowTops.value[rowIndex] ?? rowIndex * ROW_HEIGHT
 }
 
 function milestoneSize(row: TimelineRow, milestone: TimelineMilestone) {
@@ -458,210 +458,224 @@ function onLegendPhaseClick(phaseKey: string) {
       </div>
       <div
         v-else
-        class="rollout-timeline__body flex"
+        class="rollout-timeline__body"
       >
         <div
-          class="rollout-timeline__labels flex-shrink-0 w-140 sm:w-220"
-          :style="{ paddingTop: `${AXIS_HEIGHT}px` }"
+          class="rollout-timeline__axis sticky top-0 z-10 flex bg-white border-b border-gray-200"
+          :style="{ height: `${AXIS_HEIGHT}px` }"
         >
-          <template
-            v-for="item in lineItems"
-            :key="item.key"
-          >
-            <div
-              v-if="item.type === 'header'"
-              class="rollout-timeline__lane-header truncate text-[11px] font-bold uppercase tracking-wide text-primary-700 pr-10"
-              :style="{ height: `${GROUP_HEADER_HEIGHT}px`, lineHeight: `${GROUP_HEADER_HEIGHT}px` }"
-              :title="`${item.group.title} (${item.group.count})`"
+          <div class="flex-shrink-0 w-140 sm:w-220" />
+          <div class="rollout-timeline__axis-viewport relative min-w-0 flex-1 overflow-hidden">
+            <svg
+              class="rollout-timeline__axis-track"
+              :width="chartWidth"
+              :height="AXIS_HEIGHT"
+              :style="{ transform: `translateX(-${scrollLeft}px)` }"
+              aria-hidden="true"
             >
-              {{ item.group.title }} ({{ item.group.count }})
-            </div>
-            <div
-              v-else
-              class="truncate text-xs sm:text-sm pr-10"
-              :style="{ height: `${ROW_HEIGHT}px`, lineHeight: `${ROW_HEIGHT}px` }"
-              :title="item.row.label"
-            >
-              {{ item.row.label }}
-            </div>
-          </template>
+              <text
+                v-for="tick in ticks"
+                :key="`label-${tick.toISOString()}`"
+                :x="xScale(tick)"
+                :y="AXIS_HEIGHT - 10"
+                class="fill-gray-500 text-[10px]"
+              >
+                {{ formatTick(tick) }}
+              </text>
+              <text
+                :x="todayX + 4"
+                :y="AXIS_HEIGHT - 10"
+                class="fill-primary-700 text-[10px] font-bold"
+              >
+                Heute
+              </text>
+            </svg>
+          </div>
+          <div class="flex-shrink-0 w-100 sm:w-140" />
         </div>
 
-        <div
-          ref="scrollEl"
-          class="rollout-timeline__scroll relative overflow-x-auto"
-          :class="{ 'rollout-timeline__scroll--dragging': isDragging }"
-          @scroll="onTimelineScroll"
-          @pointerdown="onScrollPointerDown"
-          @pointermove="onScrollPointerMove"
-          @pointerup="endScrollDrag"
-          @pointercancel="endScrollDrag"
-          @lostpointercapture="endScrollDrag"
-        >
-          <svg
-            :width="chartWidth"
-            :height="chartHeight"
-            role="img"
-            aria-label="Zeitstrahl der Umsetzungsphasen je Dienststelle"
+        <div class="rollout-timeline__rows flex">
+          <div class="rollout-timeline__labels flex-shrink-0 w-140 sm:w-220">
+            <template
+              v-for="item in lineItems"
+              :key="item.key"
+            >
+              <div
+                v-if="item.type === 'header'"
+                class="rollout-timeline__lane-header truncate text-[11px] font-bold uppercase tracking-wide text-primary-700 pr-10"
+                :style="{ height: `${GROUP_HEADER_HEIGHT}px`, lineHeight: `${GROUP_HEADER_HEIGHT}px` }"
+                :title="`${item.group.title} (${item.group.count})`"
+              >
+                {{ item.group.title }} ({{ item.group.count }})
+              </div>
+              <div
+                v-else
+                class="truncate text-xs sm:text-sm pr-10"
+                :style="{ height: `${ROW_HEIGHT}px`, lineHeight: `${ROW_HEIGHT}px` }"
+                :title="item.row.label"
+              >
+                {{ item.row.label }}
+              </div>
+            </template>
+          </div>
+
+          <div
+            ref="scrollEl"
+            class="rollout-timeline__scroll relative min-w-0 flex-1 overflow-x-auto"
+            :class="{ 'rollout-timeline__scroll--dragging': isDragging }"
+            @scroll="onTimelineScroll"
+            @pointerdown="onScrollPointerDown"
+            @pointermove="onScrollPointerMove"
+            @pointerup="endScrollDrag"
+            @pointercancel="endScrollDrag"
+            @lostpointercapture="endScrollDrag"
           >
-            <rect
-              v-for="group in laneGroups"
-              :key="`wash-${group.key}-${group.startIndex}`"
-              :x="0"
-              :y="group.top"
+            <svg
               :width="chartWidth"
-              :height="group.height"
-              :class="group.laneFillClass"
-              fill-opacity="0.5"
-            />
-            <line
-              v-for="tick in ticks"
-              :key="`grid-${tick.toISOString()}`"
-              :x1="xScale(tick)"
-              :x2="xScale(tick)"
-              :y1="0"
-              :y2="chartHeight"
-              class="stroke-gray-200"
-              stroke-width="1"
-            />
-            <text
-              v-for="tick in ticks"
-              :key="`label-${tick.toISOString()}`"
-              :x="xScale(tick)"
-              :y="AXIS_HEIGHT - 12"
-              class="fill-gray-500 text-[10px]"
+              :height="chartHeight"
+              role="img"
+              aria-label="Zeitstrahl der Umsetzungsphasen je Dienststelle"
             >
-              {{ formatTick(tick) }}
-            </text>
-
-            <line
-              v-for="group in laneGroups.slice(1)"
-              :key="`divider-${group.key}-${group.startIndex}`"
-              :x1="0"
-              :x2="chartWidth"
-              :y1="group.top - GROUP_HEADER_HEIGHT"
-              :y2="group.top - GROUP_HEADER_HEIGHT"
-              class="stroke-gray-300"
-              stroke-width="1"
-              stroke-dasharray="4 3"
-            />
-
-            <g
-              v-for="(row, rowIndex) in rows"
-              :key="row.posten"
-            >
+              <rect
+                v-for="group in laneGroups"
+                :key="`wash-${group.key}-${group.startIndex}`"
+                :x="0"
+                :y="group.top"
+                :width="chartWidth"
+                :height="group.height"
+                :class="group.laneFillClass"
+                fill-opacity="0.5"
+              />
               <line
-                v-if="row.connectorLine"
-                :x1="xScale(clampToTimelineStart(row.connectorLine.start))"
-                :x2="xScale(clampToTimelineStart(row.connectorLine.end))"
-                :y1="rowY(rowIndex) + ROW_HEIGHT / 2"
-                :y2="rowY(rowIndex) + ROW_HEIGHT / 2"
-                class="stroke-gray-400"
+                v-for="tick in ticks"
+                :key="`grid-${tick.toISOString()}`"
+                :x1="xScale(tick)"
+                :x2="xScale(tick)"
+                :y1="0"
+                :y2="chartHeight"
+                class="stroke-gray-200"
+                stroke-width="1"
+              />
+
+              <line
+                v-for="group in laneGroups.slice(1)"
+                :key="`divider-${group.key}-${group.startIndex}`"
+                :x1="0"
+                :x2="chartWidth"
+                :y1="group.top - GROUP_HEADER_HEIGHT"
+                :y2="group.top - GROUP_HEADER_HEIGHT"
+                class="stroke-gray-300"
+                stroke-width="1"
+                stroke-dasharray="4 3"
+              />
+
+              <g
+                v-for="(row, rowIndex) in rows"
+                :key="row.posten"
+              >
+                <line
+                  v-if="row.connectorLine"
+                  :x1="xScale(clampToTimelineStart(row.connectorLine.start))"
+                  :x2="xScale(clampToTimelineStart(row.connectorLine.end))"
+                  :y1="rowY(rowIndex) + ROW_HEIGHT / 2"
+                  :y2="rowY(rowIndex) + ROW_HEIGHT / 2"
+                  class="stroke-gray-400"
+                  stroke-width="1.5"
+                  stroke-dasharray="4 3"
+                />
+                <rect
+                  v-for="milestone in row.milestones"
+                  :key="milestone.key"
+                  :x="xScale(clampToTimelineStart(milestone.date)) - milestoneSize(row, milestone) / 2"
+                  :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneSize(row, milestone) / 2"
+                  :width="milestoneSize(row, milestone)"
+                  :height="milestoneSize(row, milestone)"
+                  rx="2"
+                  :class="milestone.colorClass"
+                  class="pointer-events-none"
+                />
+                <rect
+                  v-for="milestone in row.milestones"
+                  :key="`hit-${milestone.key}`"
+                  :x="xScale(clampToTimelineStart(milestone.date)) - milestoneHitSize(row, milestone) / 2"
+                  :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneHitSize(row, milestone) / 2"
+                  :width="milestoneHitSize(row, milestone)"
+                  :height="milestoneHitSize(row, milestone)"
+                  fill="transparent"
+                  @pointerenter="showMilestone($event, row, milestone)"
+                  @pointerleave="hideMilestone"
+                >
+                  <title>{{ milestoneTitleText(milestonesOnSameDate(row, milestone)) }}</title>
+                </rect>
+              </g>
+
+              <line
+                :x1="todayX"
+                :x2="todayX"
+                :y1="0"
+                :y2="chartHeight"
+                class="stroke-primary-700"
                 stroke-width="1.5"
                 stroke-dasharray="4 3"
               />
-              <rect
-                v-for="milestone in row.milestones"
-                :key="milestone.key"
-                :x="xScale(clampToTimelineStart(milestone.date)) - milestoneSize(row, milestone) / 2"
-                :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneSize(row, milestone) / 2"
-                :width="milestoneSize(row, milestone)"
-                :height="milestoneSize(row, milestone)"
-                rx="2"
-                :class="milestone.colorClass"
-                class="pointer-events-none"
+            </svg>
+
+            <svg
+              v-if="edgeArrows.length > 0"
+              class="rollout-timeline__edge-arrows"
+              :width="viewportWidth"
+              :height="chartHeight"
+              :style="{ left: `${scrollLeft}px` }"
+              aria-hidden="true"
+            >
+              <polygon
+                v-for="arrow in edgeArrows"
+                :key="arrow.key"
+                :points="arrowPoints(arrow)"
+                :class="arrow.colorClass"
               />
-              <rect
-                v-for="milestone in row.milestones"
-                :key="`hit-${milestone.key}`"
-                :x="xScale(clampToTimelineStart(milestone.date)) - milestoneHitSize(row, milestone) / 2"
-                :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneHitSize(row, milestone) / 2"
-                :width="milestoneHitSize(row, milestone)"
-                :height="milestoneHitSize(row, milestone)"
-                fill="transparent"
-                @pointerenter="showMilestone($event, row, milestone)"
-                @pointerleave="hideMilestone"
-              >
-                <title>{{ milestoneTitleText(milestonesOnSameDate(row, milestone)) }}</title>
-              </rect>
-            </g>
+            </svg>
 
-            <line
-              :x1="todayX"
-              :x2="todayX"
-              :y1="0"
-              :y2="chartHeight"
-              class="stroke-primary-700"
-              stroke-width="1.5"
-              stroke-dasharray="4 3"
-            />
-            <text
-              :x="todayX + 4"
-              :y="AXIS_HEIGHT - 12"
-              class="fill-primary-700 text-[10px] font-bold"
-            >
-              Heute
-            </text>
-          </svg>
-
-          <svg
-            v-if="edgeArrows.length > 0"
-            class="rollout-timeline__edge-arrows"
-            :width="viewportWidth"
-            :height="chartHeight"
-            :style="{ left: `${scrollLeft}px` }"
-            aria-hidden="true"
-          >
-            <polygon
-              v-for="arrow in edgeArrows"
-              :key="arrow.key"
-              :points="arrowPoints(arrow)"
-              :class="arrow.colorClass"
-            />
-          </svg>
-
-          <div
-            v-if="activeMilestone"
-            class="rollout-timeline__tooltip fixed bg-white border border-gray-300 rounded text-xs px-10 py-5 shadow-md"
-            :style="{ left: `${activeMilestone.left}px`, top: `${activeMilestone.top}px` }"
-          >
             <div
-              v-for="(item, index) in activeMilestone.items"
-              :key="item.key"
-              :class="{ 'mt-5': index > 0 }"
+              v-if="activeMilestone"
+              class="rollout-timeline__tooltip fixed bg-white border border-gray-300 rounded text-xs px-10 py-5 shadow-md"
+              :style="{ left: `${activeMilestone.left}px`, top: `${activeMilestone.top}px` }"
             >
-              <strong>{{ item.title }}</strong>
-              <div>{{ formatHoverDate(new Date(item.date)) }}</div>
+              <div
+                v-for="(item, index) in activeMilestone.items"
+                :key="item.key"
+                :class="{ 'mt-5': index > 0 }"
+              >
+                <strong>{{ item.title }}</strong>
+                <div>{{ formatHoverDate(new Date(item.date)) }}</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div
-          class="rollout-timeline__status flex-shrink-0 w-100 sm:w-140 pl-10"
-          :style="{ paddingTop: `${AXIS_HEIGHT}px` }"
-        >
-          <template
-            v-for="item in lineItems"
-            :key="item.key"
-          >
-            <div
-              v-if="item.type === 'header'"
-              :style="{ height: `${GROUP_HEADER_HEIGHT}px` }"
-            />
-            <div
-              v-else
-              class="flex items-center"
-              :style="{ height: `${ROW_HEIGHT}px` }"
+          <div class="rollout-timeline__status flex-shrink-0 w-100 sm:w-140 pl-10">
+            <template
+              v-for="item in lineItems"
+              :key="item.key"
             >
-              <span
-                class="rollout-timeline__status-chip inline-block max-w-full truncate rounded-sm px-5 text-[11px] font-medium"
-                :class="item.row.currentPhaseChipClass"
-                :title="item.row.currentPhaseTitle"
+              <div
+                v-if="item.type === 'header'"
+                :style="{ height: `${GROUP_HEADER_HEIGHT}px` }"
+              />
+              <div
+                v-else
+                class="flex items-center"
+                :style="{ height: `${ROW_HEIGHT}px` }"
               >
-                {{ item.row.currentPhaseTitle }}
-              </span>
-            </div>
-          </template>
+                <span
+                  class="rollout-timeline__status-chip inline-block max-w-full truncate rounded-sm px-5 text-[11px] font-medium"
+                  :class="item.row.currentPhaseChipClass"
+                  :title="item.row.currentPhaseTitle"
+                >
+                  {{ item.row.currentPhaseTitle }}
+                </span>
+              </div>
+            </template>
+          </div>
         </div>
       </div>
 
@@ -679,6 +693,11 @@ function onLegendPhaseClick(phaseKey: string) {
 .rollout-timeline__scroll {
   scrollbar-width: thin;
   cursor: grab;
+}
+
+.rollout-timeline__axis-track {
+  display: block;
+  pointer-events: none;
 }
 
 .rollout-timeline__scroll--dragging {
