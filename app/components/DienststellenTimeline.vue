@@ -28,6 +28,8 @@ const AXIS_HEIGHT = 28
 const PX_PER_DAY = 6
 const MIN_CHART_WIDTH = 480
 const DAY_MS = 24 * 60 * 60 * 1000
+/** Keeps the year boundary off the viewport edge when jumping to a year. */
+const YEAR_SCROLL_LEAD_IN = 12
 
 const today = new Date()
 const formatDate = d3.timeFormat('%d.%m.%Y')
@@ -35,15 +37,20 @@ const formatTick = d3.timeFormat('%m.%Y')
 
 const timelineStart = new Date(TIMELINE_START_DATE)
 
-const timeDomain = computed<[Date, Date]>(() => {
-  const dates = props.rows.flatMap((row) => row.milestones.map((milestone) => new Date(milestone.date)))
-  if (dates.length === 0) {
-    return [timelineStart, today]
-  }
-  const earliest = new Date(Math.min(...dates.map((date) => date.getTime())))
-  const domainStart = new Date(Math.max(earliest.getTime() - 7 * DAY_MS, timelineStart.getTime()))
-  return [domainStart, new Date(today.getTime() + 7 * DAY_MS)]
-})
+/**
+ * Fixed extent, independent of the rows on screen, so the axis and the chart
+ * width stay put while the phase filter changes which Dienststellen are shown.
+ */
+const timeDomain = computed<[Date, Date]>(() => [
+  timelineStart,
+  new Date(today.getTime() + 7 * DAY_MS),
+])
+
+/** One jump button per calendar year touched by [timelineStart, today]. */
+const yearOptions = Array.from(
+  { length: today.getFullYear() - timelineStart.getFullYear() + 1 },
+  (_, index) => timelineStart.getFullYear() + index,
+)
 
 const chartWidth = computed(() => {
   const [start, end] = timeDomain.value
@@ -189,9 +196,28 @@ onMounted(() => {
   syncScrollToEnd()
 })
 
-watch([chartWidth, () => props.rows.length], () => {
-  syncScrollToEnd()
-})
+function scrollTimelineTo(left: number) {
+  const el = scrollEl.value
+  if (!el) {
+    return
+  }
+  const maxLeft = Math.max(el.scrollWidth - el.clientWidth, 0)
+  el.scrollTo({
+    left: Math.min(Math.max(left, 0), maxLeft),
+    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+  })
+}
+
+function scrollToYear(year: number) {
+  scrollTimelineTo(xScale.value(clampToTimelineStart(`${year}-01-01`)) - YEAR_SCROLL_LEAD_IN)
+}
+
+function scrollToToday() {
+  const el = scrollEl.value
+  if (el) {
+    scrollTimelineTo(el.scrollWidth)
+  }
+}
 
 function milestonesOnSameDate(row: TimelineRow, milestone: TimelineMilestone) {
   return row.milestones.filter((candidate) => candidate.date === milestone.date)
@@ -249,6 +275,29 @@ function onLegendPhaseClick(phaseKey: string) {
             :class="item.swatchClass"
           />
           <span class="text-xs text-primary-600">{{ item.title }}</span>
+        </button>
+      </div>
+
+      <div
+        class="rollout-timeline__timenav flex flex-wrap items-center gap-5 mb-10"
+        role="group"
+        aria-label="Zeitraum im Zeitstrahl anspringen"
+      >
+        <button
+          v-for="year in yearOptions"
+          :key="year"
+          type="button"
+          class="rollout-timeline__timenav-item text-xs"
+          @click="scrollToYear(year)"
+        >
+          {{ year }}
+        </button>
+        <button
+          type="button"
+          class="rollout-timeline__timenav-item text-xs"
+          @click="scrollToToday"
+        >
+          Heute
         </button>
       </div>
 
@@ -482,5 +531,19 @@ function onLegendPhaseClick(phaseKey: string) {
 
 .rollout-timeline__legend-item--dimmed {
   opacity: 0.45;
+}
+
+.rollout-timeline__timenav-item {
+  background: white;
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  color: var(--color-primary-700, #006874);
+  cursor: pointer;
+}
+
+.rollout-timeline__timenav-item:hover {
+  border-color: var(--color-primary-600, #00838f);
+  background: color-mix(in srgb, var(--color-primary-600, #00838f) 8%, white);
 }
 </style>
