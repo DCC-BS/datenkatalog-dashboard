@@ -135,7 +135,8 @@ const filteredTimelineRows = computed(() => {
             Übersicht der erreichten Termine je begleitete Dienststelle und Projektphase, ab
             Dezember 2025 bis heute. Durch Klicken auf eine Phase in der Legende werden
             die Dienststellen nach ihrem aktuellen Projektstand gefiltert.
-            Für weiterführende Erklärungen bitte den Abschnitt «Anmerkungen» konsultieren.
+            Für weiterführende Erklärungen bitte den Abschnitt
+            <a href="#anmerkungen">«Anmerkungen»</a> konsultieren.
           </p>
         </div>
       </div>
@@ -161,7 +162,10 @@ const filteredTimelineRows = computed(() => {
       />
 
       <div class="my-20 lg:mb-30 xl:pr-220">
-        <h3 class="h3 mb-20 lg:mb-30 scroll-mt-10 xl:pr-140">
+        <h3
+          id="anmerkungen"
+          class="h3 mb-20 lg:mb-30 scroll-mt-10 xl:pr-140"
+        >
           Anmerkungen
         </h3>
         <div class="ck-content hyphens-auto lg:hyphens-none">
