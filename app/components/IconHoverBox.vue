@@ -62,8 +62,15 @@ function onTriggerClick(event: MouseEvent) {
         :side-offset="6"
         :avoid-collisions="true"
         :collision-padding="8"
-        class="z-50 w-[min(360px,calc(100vw-16px))] rounded-large border border-primary-600 bg-green-50 p-15 pr-50 shadow-[0_10px_25px_#BABABA] outline-none"
+        class="relative z-50 w-[min(360px,calc(100vw-16px))] rounded-large border border-primary-600 bg-green-50 p-15 pr-50 shadow-[0_10px_25px_#BABABA] outline-none"
       >
+        <div
+          class="absolute right-10 top-10 flex items-center justify-center w-28 h-28 text-primary-600"
+          aria-hidden="true"
+        >
+          <IconSymbolCircleWarning class="w-full h-full transform rotate-180" />
+        </div>
+
         <div class="flex flex-wrap items-baseline mr-20">
           <strong class="text-base mr-[6px] text-primary-600">
             {{ title }}

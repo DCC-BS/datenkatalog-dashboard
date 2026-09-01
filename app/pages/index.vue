@@ -132,10 +132,10 @@ const filteredTimelineRows = computed(() => {
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Übersicht der erreichten Termine je begleitete Dienststelle und Projekthhase, ab
+            Übersicht der erreichten Termine je begleitete Dienststelle und Projektphase, ab
             Dezember 2025 bis heute. Durch Klicken auf eine Phase in der Legende werden
-			die Dienststellen nach ihrem aktuellen Projektstand gefiltert.
-			Für weiterführende Erklärungen bitte den Abschnitt «Anmerkungen» konsultieren.
+            die Dienststellen nach ihrem aktuellen Projektstand gefiltert.
+            Für weiterführende Erklärungen bitte den Abschnitt «Anmerkungen» konsultieren.
           </p>
         </div>
       </div>
