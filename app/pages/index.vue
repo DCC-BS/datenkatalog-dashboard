@@ -64,12 +64,6 @@ const filteredTimelineRows = computed(() => {
           finden Sie
           <a href="https://www.bs.ch/schwerpunkte/daten/databs/schwerpunkte/datenkatalog" target="_blank" rel="noopener noreferrer">hier</a>.
         </p>
-        <p>
-          Die folgenden Kennzahlen zeigen, wie viele Dienststellen die jeweilige Phase kumulativ bereits
-          durchlaufen bzw. erreicht haben. Eine Erklärung für die jeweilige Phase wird beim Überfahren
-          bzw. Antippen des Informations-Icons angezeigt.
-          Der Zeitstrahl visualisiert die erreichten Termine pro begleitete Dienststelle bzw. Fachstelle.
-        </p>
       </div>
     </div>
 
@@ -80,7 +74,10 @@ const filteredTimelineRows = computed(() => {
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Anzahl der Dienststellen, die mindestens die jeweilige Phase erreicht haben.
+            Die folgenden Kennzahlen zeigen, wie viele Dienststellen die jeweilige Phase kumulativ bereits
+            durchlaufen bzw. erreicht haben. Eine Erklärung für die jeweilige Phase wird beim Überfahren
+            bzw. Antippen des Informations-Icons angezeigt.
+            Der Zeitstrahl visualisiert die erreichten Termine pro begleitete Dienststelle bzw. Fachstelle.
           </p>
         </div>
       </div>
