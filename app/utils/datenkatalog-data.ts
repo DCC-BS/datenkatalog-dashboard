@@ -7,8 +7,8 @@ export interface DatenkatalogRow {
   status_info: string | null
   status_kick_off: string | null
   status_metadatenerfassung: string | null
-  status_review_und_abnahme: string | null
-  status_abgeschlossen: string | null
+  status_review: string | null
+  status_abnahme_freigabe_data_owner: string | null
 }
 
 export interface DatenkatalogKpi {
@@ -69,7 +69,7 @@ export const PHASE_DEFINITIONS = [
   },
   {
     key: 'review',
-    field: 'status_review_und_abnahme',
+    field: 'status_review',
     title: 'Review',
     description: 'Fachliche Prüfung der erfassten Metadaten',
     colorClass: 'fill-yellow-600',
@@ -81,7 +81,7 @@ export const PHASE_DEFINITIONS = [
   },
   {
     key: 'abgenommen',
-    field: 'status_abgeschlossen',
+    field: 'status_abnahme_freigabe_data_owner',
     title: 'Abnahme',
     description: 'Formeller Abschluss der Umsetzung',
     colorClass: 'fill-purple-600',
@@ -261,8 +261,8 @@ function buildConnectorLine(
   if (!startPhase) {
     return null
   }
-  const end = hasPhaseValue(row.status_abgeschlossen)
-    ? (row.status_abgeschlossen as string)
+  const end = hasPhaseValue(row.status_abnahme_freigabe_data_owner)
+    ? (row.status_abnahme_freigabe_data_owner as string)
     : today.toISOString().slice(0, 10)
   return { start: row[startPhase.field] as string, end }
 }
