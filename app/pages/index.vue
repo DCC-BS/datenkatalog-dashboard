@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import IconSymbolInfoI from '@kanton-basel-stadt/designsystem/icons/symbol/info-i'
 import { buildTimelineRows, formatDatenstand, PHASE_DEFINITIONS } from '~/utils/datenkatalog-data'
 
 useHead({
@@ -22,24 +21,9 @@ function togglePhaseFilter(phaseKey: string) {
   selectedPhaseKey.value = selectedPhaseKey.value === phaseKey ? null : phaseKey
 }
 
-/** Phase whose definition overlay is currently open, or null when closed. */
-const infoPhaseKey = ref<string | null>(null)
-
-const infoPhase = computed(() => {
-  const phaseKey = infoPhaseKey.value
-  if (!phaseKey) {
-    return null
-  }
-  return PHASE_DEFINITIONS.find((phase) => phase.key === phaseKey) ?? null
-})
-
-function openPhaseInfo(phaseKey: string) {
-  infoPhaseKey.value = phaseKey
-}
-
-function closePhaseInfo() {
-  infoPhaseKey.value = null
-}
+const phaseDetailByKey = Object.fromEntries(
+  PHASE_DEFINITIONS.map((phase) => [phase.key, phase.detailContent]),
+)
 
 const filteredTimelineRows = computed(() => {
   const phaseKey = selectedPhaseKey.value
@@ -82,8 +66,8 @@ const filteredTimelineRows = computed(() => {
         </p>
         <p>
           Die folgenden Kennzahlen zeigen, wie viele Dienststellen die jeweilige Phase kumulativ bereits
-          durchlaufen bzw. erreicht haben. Eine Erklärung für die jeweilige Phase kann mit einem Klick auf das
-          Informations-Icon angezeigt werden.
+          durchlaufen bzw. erreicht haben. Eine Erklärung für die jeweilige Phase wird beim Überfahren
+          bzw. Antippen des Informations-Icons angezeigt.
           Der Zeitstrahl visualisiert die erreichten Termine pro begleitete Dienststelle bzw. Fachstelle.
         </p>
       </div>
@@ -126,31 +110,20 @@ const filteredTimelineRows = computed(() => {
             :title="kpi.title"
             :description="kpi.description"
             :value="kpi.count"
-            class="phase-filter-control"
-            :class="{
-              'phase-filter-control--selected': selectedPhaseKey === kpi.key,
-              'phase-filter-control--dimmed': selectedPhaseKey != null && selectedPhaseKey !== kpi.key,
-            }"
-            role="button"
-            tabindex="0"
-            :aria-pressed="selectedPhaseKey === kpi.key"
-            @click="togglePhaseFilter(kpi.key)"
-            @keydown.enter.prevent="togglePhaseFilter(kpi.key)"
-            @keydown.space.prevent="togglePhaseFilter(kpi.key)"
           />
-          <button
-            type="button"
-            class="kpi-info-trigger absolute top-10 right-10 flex items-center justify-center w-24 h-24 rounded-full"
-            :aria-label="`Definition anzeigen: ${kpi.title}`"
-            @click="openPhaseInfo(kpi.key)"
-          >
-            <component :is="IconSymbolInfoI" aria-hidden="true" class="w-16 h-16" />
-          </button>
+          <div class="absolute top-10 right-10">
+            <IconHoverBox
+              :title="kpi.title"
+              :aria-label="`Definition: ${kpi.title}`"
+            >
+              <template #body>
+                <div v-html="phaseDetailByKey[kpi.key]" />
+              </template>
+            </IconHoverBox>
+          </div>
         </div>
       </div>
     </div>
-
-    <PhaseInfoDialog :phase="infoPhase" @close="closePhaseInfo" />
 
     <div>
       <h3 class="h3 mb-20 lg:mb-30 mt-10 md:mt-40 xl:mt-50 scroll-mt-10 xl:pr-140">
@@ -234,30 +207,6 @@ const filteredTimelineRows = computed(() => {
 </template>
 
 <style scoped>
-.phase-filter-control {
-  cursor: pointer;
-}
-
-.phase-filter-control--selected {
-  border-color: var(--color-primary-600, #00838f);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary-600, #00838f) 35%, transparent);
-}
-
-.phase-filter-control--dimmed {
-  opacity: 0.55;
-}
-
-.kpi-info-trigger {
-  cursor: pointer;
-  color: var(--color-primary-600, #00838f);
-  background: none;
-  border: none;
-}
-
-.kpi-info-trigger:hover {
-  color: var(--color-primary-800, #005662);
-}
-
 :deep(.kpi-card__intro) {
   padding-right: 28px;
 }
