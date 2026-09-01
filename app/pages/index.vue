@@ -57,7 +57,7 @@ const filteredTimelineRows = computed(() => {
     </h1>
     <p class="lead mt-30 hyphens-auto lg:hyphens-none text-pretty">
       Fortschritt bei der Einführung des Kantonalen Datenkatalogs pro Dienststelle – von
-      Kontaktiert bis Abnahme.
+      «Kontaktiert» bis «Abnahme».
     </p>
 
     <div class="my-20 lg:mb-30 xl:pr-220">
@@ -65,18 +65,26 @@ const filteredTimelineRows = computed(() => {
         <p>
           Dieses Dashboard gibt einen Überblick über den Rollout des Datenkatalogs
           im Kanton Basel-Stadt.
+          Es zeigt damit, wie die Metadatenerfassung der kantonalen Datenbestände voranschreitet.
+        </p>
+        <p>
+          Im Dashboard erscheinen nur Dienststellen, mit denen bereits Kontakt zur Umsetzung aufenommen wurde – entweder
+          durch das DCC oder auf Initiative der Dienststelle.
+          Nicht aufgeführte Dienststellen stehen bislang noch nicht im Austausch mit dem DCC.
+        </p>
+        <p>
           Für jede Dienststelle wird sichtbar, in welcher Phase sich die
-          Umsetzung befindet: Kontaktiert, Informiert, Kick-Off, Beginn Metadatenerfassung,
-          Review und Abnahme.
+          Umsetzung befindet: «Kontaktiert», «Informiert», «Kick-Off», «Beginn Metadatenerfassung», «Review» und «Abnahme».
           Weitere Informationen über den
           <a href="https://datenkatalog.bs.ch" target="_blank" rel="noopener noreferrer">Kantonalen Datenkatalog</a>
           finden Sie
           <a href="https://www.bs.ch/schwerpunkte/daten/databs/schwerpunkte/datenkatalog" target="_blank" rel="noopener noreferrer">hier</a>.
         </p>
         <p>
-          Die Kennzahlen unten zeigen, wie viele Dienststellen die jeweilige Phase bereits
-          erreicht haben. Der Zeitstrahl visualisiert die erreichten Termine pro laufender
-          Dienststelle.
+          Die folgenden Kennzahlen zeigen, wie viele Dienststellen die jeweilige Phase kumulativ bereits
+          durchlaufen bzw. erreicht haben. Eine Erklärung für die jeweilige Phase kann mit einem Klick auf das
+          Informations-Icon angezeigt werden.
+          Der Zeitstrahl visualisiert die erreichten Termine pro begleitete Dienststelle bzw. Fachstelle.
         </p>
       </div>
     </div>
@@ -151,9 +159,10 @@ const filteredTimelineRows = computed(() => {
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Übersicht der erreichten Termine je laufender Dienststelle und Phase, ab
+            Übersicht der erreichten Termine je begleitete Dienststelle und Projekthhase, ab
             Dezember 2025 bis heute. Durch Klicken auf eine Phase in der Legende werden
-			die Dienststellen nach ihrer aktuell laufenden Phase gefiltert.
+			die Dienststellen nach ihrem aktuellen Projektstand gefiltert.
+			Für weiterführende Erklärungen bitte den Abschnitt «Anmerkungen» konsultieren.
           </p>
         </div>
       </div>
@@ -180,28 +189,21 @@ const filteredTimelineRows = computed(() => {
 
       <div class="my-20 lg:mb-30 xl:pr-220">
         <h3 class="h3 mb-20 lg:mb-30 scroll-mt-10 xl:pr-140">
-          Anmerkungen zu den Zeitstrahlen
+          Anmerkungen
         </h3>
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Der Zeitstrahl zeigt die jeweils zuletzt erreichte Phase einer Dienststelle.
-            Endet der Zeitstrahl vor der letzten Projektphase, bedeutet dies nicht zwingend
-            eine Verzögerung. Der Rollout erfolgt in enger Abstimmung mit den Dienststellen
-            und orientiert sich an deren zeitlichen und organisatorischen Möglichkeiten.
-            Pausen zwischen einzelnen Phasen können beispielsweise durch unterschiedliche
-            Prioritäten, personelle Veränderungen, laufende Projekte oder einen erhöhten
-            Abstimmungs- und Bearbeitungsaufwand entstehen.
+            Der Zeitstrahl zeigt die jeweils zuletzt erreichte Projektphase einer Dienststelle.
+            Endet der Zeitstrahl vor der letzten Phase, lässt sich daraus nicht unmittelbar auf
+            den aktuellen Bearbeitungsstand oder eine Verzögerung schliessen.
+            Der Rollout erfolgt in Abstimmung mit den Dienststellen und orientiert sich an den jeweiligen zeitlichen
+            und organisatorischen Rahmenbedingungen.
           </p>
           <p>
-            Auch der Umfang der zu erfassenden Metadaten unterscheidet sich je nach
-            Dienststelle teilweise erheblich und beeinflusst die Dauer einzelner Phasen.
-            Unterschiede in der Dauer der einzelnen Phasen sind daher Teil des regulären
-            Rollout-Prozesses.
-          </p>
-          <p>
-            Im Dashboard erscheinen nur Dienststellen, mit denen bereits Kontakt
-            aufgenommen wurde. Nicht aufgeführte Dienststellen wurden bisher noch nicht
-            kontaktiert.
+            Auch der Umfang der zu erfassenden Metadaten kann sich zwischen den Dienststelle
+            erheblich unterscheiden und die Dauer einzelner Projektphasen beeinflussen. Zwischen den
+            einzelnen Phasen können daher unterschiedlich lange Zeiträume liegen. Der dargestellte Stand
+            bildet jeweils den letzten dokumentierten Schritt im gemeinsamen Rollout-Prozess ab.
           </p>
         </div>
       </div>
@@ -209,13 +211,15 @@ const filteredTimelineRows = computed(() => {
 
     <div>
       <h3 class="h3 mb-20 lg:mb-30 mt-10 md:mt-40 xl:mt-50 scroll-mt-10 xl:pr-140">
-        Kontakt
+        Interesse am Rollout?
       </h3>
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
             Möchten Sie den Rollout Ihrer Dienststelle starten? Melden Sie sich einfach
-            per E-Mail oder rufen Sie uns an:
+            per E-Mail oder telefonisch bei uns. Das DCC begleitet Sie eng bei der
+            Ersterfassung und klärt gemeinsam mit Ihnen, welche Datenbestände sinnvoll im Datenkatalog
+            erfasst werden und wie die Erfassung möglichst ressourcenschonend gestaltet werden kann.
           </p>
         </div>
       </div>
