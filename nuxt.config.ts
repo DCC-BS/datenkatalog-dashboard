@@ -19,10 +19,6 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
         { name: 'theme-color', content: '#00838f' },
       ],
-      link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/icons/favicon.png' },
-        { rel: 'stylesheet', href: '/fonts.css' },
-      ],
     },
   },
 
