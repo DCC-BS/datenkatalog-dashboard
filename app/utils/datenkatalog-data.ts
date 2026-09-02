@@ -221,14 +221,27 @@ export function buildKpisFromRows(
 /** Local midnight. A date-only ISO string parses as UTC and skips the Dec month tick in CET. */
 export const TIMELINE_START_DATE = '2025-12-01T00:00:00'
 
+/** Days past today where out-of-range planned dates are visually pinned. */
+export const PLANNED_DATE_OFFSET_DAYS = 3
+
+const DAY_MS = 24 * 60 * 60 * 1000
+
 /**
- * Clamps a date to TIMELINE_START_DATE so early milestones/connectors are
- * visually pinned to the timeline's start instead of stretching it back.
+ * Pins dates for chart placement: before TIMELINE_START_DATE → start;
+ * after today + PLANNED_DATE_OFFSET_DAYS → that offset (not the chart's
+ * today+7 domain end). In-range dates are unchanged.
  */
-export function clampToTimelineStart(date: string | Date): Date {
+export function clampToTimelineBounds(date: string | Date, today: Date = new Date()): Date {
   const parsed = new Date(date)
   const start = new Date(TIMELINE_START_DATE)
-  return parsed.getTime() < start.getTime() ? start : parsed
+  if (parsed.getTime() < start.getTime()) {
+    return start
+  }
+  const plannedPin = new Date(today.getTime() + PLANNED_DATE_OFFSET_DAYS * DAY_MS)
+  if (parsed.getTime() > plannedPin.getTime()) {
+    return plannedPin
+  }
+  return parsed
 }
 
 export interface TimelineMilestone {

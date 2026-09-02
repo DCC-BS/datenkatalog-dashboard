@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as d3 from 'd3'
 import {
-  clampToTimelineStart,
+  clampToTimelineBounds,
   PHASE_DEFINITIONS,
   TIMELINE_START_DATE,
   type PhaseCountMode,
@@ -45,13 +45,17 @@ const today = new Date()
 const formatDate = d3.timeFormat('%d.%m.%Y')
 
 /**
- * Formats a milestone date for hover display, collapsing any date before
- * TIMELINE_START_DATE to "vor 01.12.2025" instead of the real date.
+ * Formats a milestone date for hover display: dates before TIMELINE_START_DATE
+ * collapse to "vor 01.12.2025"; future (planned) dates show as
+ * "geplant am DD.MM.YYYY" with the actual date.
  */
 function formatHoverDate(date: Date): string {
   const start = new Date(TIMELINE_START_DATE)
   if (date.getTime() < start.getTime()) {
     return 'vor 01.12.2025'
+  }
+  if (date.getTime() > today.getTime()) {
+    return `geplant am ${formatDate(date)}`
   }
   return formatDate(date)
 }
@@ -278,8 +282,8 @@ const edgeArrows = computed<EdgeArrow[]>(() => {
     }
     const firstMilestone = row.milestones[0]!
     const lastMilestone = row.milestones[row.milestones.length - 1]!
-    const firstX = xScale.value(clampToTimelineStart(firstMilestone.date))
-    const lastX = xScale.value(clampToTimelineStart(lastMilestone.date))
+    const firstX = xScale.value(clampToTimelineBounds(firstMilestone.date))
+    const lastX = xScale.value(clampToTimelineBounds(lastMilestone.date))
     const y = rowY(rowIndex) + ROW_HEIGHT / 2
     if (lastX < viewLeft) {
       arrows.push(buildEdgeArrow({
@@ -398,7 +402,7 @@ function scrollTimelineTo(left: number) {
 }
 
 function scrollToYear(year: number) {
-  scrollTimelineTo(xScale.value(clampToTimelineStart(`${year}-01-01`)) - YEAR_SCROLL_LEAD_IN)
+  scrollTimelineTo(xScale.value(clampToTimelineBounds(`${year}-01-01`)) - YEAR_SCROLL_LEAD_IN)
 }
 
 function scrollToToday() {
@@ -678,8 +682,8 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
               >
                 <line
                   v-if="row.connectorLine"
-                  :x1="xScale(clampToTimelineStart(row.connectorLine.start))"
-                  :x2="xScale(clampToTimelineStart(row.connectorLine.end))"
+                  :x1="xScale(clampToTimelineBounds(row.connectorLine.start))"
+                  :x2="xScale(clampToTimelineBounds(row.connectorLine.end))"
                   :y1="rowY(rowIndex) + ROW_HEIGHT / 2"
                   :y2="rowY(rowIndex) + ROW_HEIGHT / 2"
                   class="stroke-gray-400"
@@ -689,7 +693,7 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
                 <rect
                   v-for="milestone in row.milestones"
                   :key="milestone.key"
-                  :x="xScale(clampToTimelineStart(milestone.date)) - milestoneSize(row, milestone) / 2"
+                  :x="xScale(clampToTimelineBounds(milestone.date)) - milestoneSize(row, milestone) / 2"
                   :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneSize(row, milestone) / 2"
                   :width="milestoneSize(row, milestone)"
                   :height="milestoneSize(row, milestone)"
@@ -700,7 +704,7 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
                 <rect
                   v-for="milestone in row.milestones"
                   :key="`hit-${milestone.key}`"
-                  :x="xScale(clampToTimelineStart(milestone.date)) - milestoneHitSize(row, milestone) / 2"
+                  :x="xScale(clampToTimelineBounds(milestone.date)) - milestoneHitSize(row, milestone) / 2"
                   :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneHitSize(row, milestone) / 2"
                   :width="milestoneHitSize(row, milestone)"
                   :height="milestoneHitSize(row, milestone)"
