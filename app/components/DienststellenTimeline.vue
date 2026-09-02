@@ -77,6 +77,24 @@ function formatTick(date: Date): string {
   return `${GERMAN_MONTHS[date.getMonth()]} ${date.getFullYear()}`
 }
 
+/**
+ * Rough px width for axis `text-[10px]` labels; avoids DOM measuring.
+ * If a short month still shifts when it shouldn’t (or a long one still clips), tweak this slightly.
+ */
+const AXIS_CHAR_WIDTH = 5.5
+const HEUTE_LABEL = 'Heute'
+const HEUTE_LABEL_OFFSET = 4
+
+function approxLabelWidth(text: string) {
+  return text.length * AXIS_CHAR_WIDTH
+}
+
+interface AxisTickLabel {
+  date: Date
+  x: number
+  textAnchor: 'start' | 'end'
+}
+
 const timelineStart = new Date(TIMELINE_START_DATE)
 
 /**
@@ -183,6 +201,36 @@ const xScale = computed(() => d3.scaleTime().domain(timeDomain.value).range([0, 
 const ticks = computed(() => xScale.value.ticks(Math.max(Math.round(chartWidth.value / 90), 2)))
 
 const todayX = computed(() => xScale.value(today))
+
+/**
+ * Month labels share the axis baseline with "Heute". When a left-aligned month
+ * label would overlap Heute, end-align it just left of Heute instead of hiding it.
+ * Uses scale(today) inline so this does not depend on todayX.
+ */
+const axisTickLabels = computed<AxisTickLabel[]>(() => {
+  const scale = xScale.value
+  const todayPx = scale(today)
+  const heuteLeft = todayPx + HEUTE_LABEL_OFFSET
+  const heuteRight = heuteLeft + approxLabelWidth(HEUTE_LABEL)
+
+  return ticks.value.map((tick) => {
+    const tickX = scale(tick)
+    const monthRight = tickX + approxLabelWidth(formatTick(tick))
+    const overlapsHeute = tickX < heuteRight && monthRight > heuteLeft
+    if (overlapsHeute) {
+      return {
+        date: tick,
+        x: todayPx,
+        textAnchor: 'end',
+      }
+    }
+    return {
+      date: tick,
+      x: tickX,
+      textAnchor: 'start',
+    }
+  })
+})
 
 const legendItems = computed(() =>
   PHASE_DEFINITIONS.map((phase) => ({
@@ -581,20 +629,21 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
               aria-hidden="true"
             >
               <text
-                v-for="tick in ticks"
-                :key="`label-${tick.toISOString()}`"
-                :x="xScale(tick)"
+                v-for="tick in axisTickLabels"
+                :key="`label-${tick.date.toISOString()}`"
+                :x="tick.x"
                 :y="AXIS_HEIGHT - 10"
+                :text-anchor="tick.textAnchor"
                 class="fill-gray-500 text-[10px]"
               >
-                {{ formatTick(tick) }}
+                {{ formatTick(tick.date) }}
               </text>
               <text
-                :x="todayX + 4"
+                :x="todayX + HEUTE_LABEL_OFFSET"
                 :y="AXIS_HEIGHT - 10"
                 class="fill-primary-700 text-[10px] font-bold"
               >
-                Heute
+                {{ HEUTE_LABEL }}
               </text>
             </svg>
           </div>
