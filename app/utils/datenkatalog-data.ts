@@ -18,6 +18,9 @@ export interface DatenkatalogKpi {
   count: number
 }
 
+/** How phase KPI counts and the timeline phase filter interpret a phase. */
+export type PhaseCountMode = 'cumulative' | 'current'
+
 export const PHASE_DEFINITIONS = [
   {
     key: 'kontaktiert',
@@ -133,6 +136,31 @@ function hasPhaseValue(value: string | null | undefined): boolean {
   return value != null && String(value).trim() !== ''
 }
 
+/**
+ * Farthest phase with a date filled, or null if the row has no phase dates.
+ * Same rule as timeline `currentPhaseKey`.
+ */
+export function getRowCurrentPhaseKey(row: DatenkatalogRow): string | null {
+  const phaseRank = PHASE_DEFINITIONS.findLastIndex((phase) =>
+    hasPhaseValue(row[phase.field]),
+  )
+  if (phaseRank < 0) {
+    return null
+  }
+  return PHASE_DEFINITIONS[phaseRank].key
+}
+
+/** True if the row has reached this phase or any later one (cumulative). */
+export function rowReachedPhase(row: DatenkatalogRow, phaseKey: string): boolean {
+  const phaseIndex = PHASE_DEFINITIONS.findIndex((phase) => phase.key === phaseKey)
+  if (phaseIndex < 0) {
+    return false
+  }
+  return PHASE_DEFINITIONS.slice(phaseIndex).some((laterPhase) =>
+    hasPhaseValue(row[laterPhase.field]),
+  )
+}
+
 export function normalizeDatenkatalogRows(data: unknown): DatenkatalogRow[] {
   if (!Array.isArray(data)) {
     return []
@@ -174,15 +202,18 @@ export function formatDatenstand(isoDateTime: string): string | null {
   return `${day}.${month}.${year}`
 }
 
-export function buildKpisFromRows(rows: DatenkatalogRow[]): DatenkatalogKpi[] {
-  return PHASE_DEFINITIONS.map((phase, phaseIndex) => ({
+export function buildKpisFromRows(
+  rows: DatenkatalogRow[],
+  mode: PhaseCountMode = 'cumulative',
+): DatenkatalogKpi[] {
+  return PHASE_DEFINITIONS.map((phase) => ({
     key: phase.key,
     title: phase.title,
     description: phase.description,
     count: rows.filter((row) =>
-      PHASE_DEFINITIONS.slice(phaseIndex).some((laterPhase) =>
-        hasPhaseValue(row[laterPhase.field]),
-      ),
+      mode === 'current'
+        ? getRowCurrentPhaseKey(row) === phase.key
+        : rowReachedPhase(row, phase.key),
     ).length,
   }))
 }
@@ -290,7 +321,7 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
 
     const abbreviation = getDepartmentAbbreviation(row.departement)
 
-    const currentPhaseKey = PHASE_DEFINITIONS[phaseRank].key
+    const currentPhaseKey = getRowCurrentPhaseKey(row)!
     const currentPhase = getCurrentPhase(currentPhaseKey)
 
     return {

@@ -4,6 +4,7 @@ import {
   clampToTimelineStart,
   PHASE_DEFINITIONS,
   TIMELINE_START_DATE,
+  type PhaseCountMode,
   type TimelineMilestone,
   type TimelineRow,
 } from '~/utils/datenkatalog-data'
@@ -11,12 +12,19 @@ import {
 const props = defineProps<{
   rows: TimelineRow[]
   selectedPhaseKey?: string | null
+  phaseCountMode?: PhaseCountMode
   datenstand?: string | null
 }>()
 
 const emit = defineEmits<{
   'select-phase': [phaseKey: string]
+  'update:phaseCountMode': [mode: PhaseCountMode]
 }>()
+
+const phaseCountModeItems = [
+  { value: 'cumulative' as const, label: 'Kumulativ' },
+  { value: 'current' as const, label: 'Aktuell' },
+]
 
 const ROW_HEIGHT = 36
 const MILESTONE_SIZE = 12
@@ -179,6 +187,24 @@ const legendItems = computed(() =>
     swatchClass: phase.legendSwatchClass,
   })),
 )
+
+/**
+ * Visual highlight for legend phases. In cumulative mode, the selected phase
+ * and all later phases are highlighted (filter shows rows that reached any of them).
+ * Click/toggle state remains selectedPhaseKey only.
+ */
+function isLegendPhaseHighlighted(phaseKey: string): boolean {
+  const selected = props.selectedPhaseKey
+  if (selected == null) {
+    return false
+  }
+  if (props.phaseCountMode !== 'cumulative') {
+    return selected === phaseKey
+  }
+  const selectedIndex = PHASE_DEFINITIONS.findIndex((phase) => phase.key === selected)
+  const itemIndex = PHASE_DEFINITIONS.findIndex((phase) => phase.key === phaseKey)
+  return selectedIndex >= 0 && itemIndex >= selectedIndex
+}
 
 function rowY(rowIndex: number) {
   return rowTops.value[rowIndex] ?? rowIndex * ROW_HEIGHT
@@ -395,6 +421,10 @@ function endScrollDrag(event: PointerEvent) {
 function onLegendPhaseClick(phaseKey: string) {
   emit('select-phase', phaseKey)
 }
+
+function onPhaseCountModeClick(mode: PhaseCountMode) {
+  emit('update:phaseCountMode', mode)
+}
 </script>
 
 <template>
@@ -406,6 +436,25 @@ function onLegendPhaseClick(phaseKey: string) {
       Aktuell sind keine Dienststellen in Bearbeitung.
     </div>
     <template v-else>
+      <div
+        class="rollout-timeline__phase-count-mode flex flex-wrap items-center gap-5 mb-10"
+        role="group"
+        aria-label="Zählweise der Kennzahlen"
+      >
+        <button
+          v-for="item in phaseCountModeItems"
+          :key="item.value"
+          type="button"
+          class="rollout-timeline__phase-count-mode-item text-xs"
+          :class="{
+            'rollout-timeline__phase-count-mode-item--selected': phaseCountMode === item.value,
+          }"
+          :aria-pressed="phaseCountMode === item.value"
+          @click="onPhaseCountModeClick(item.value)"
+        >
+          {{ item.label }}
+        </button>
+      </div>
       <div class="rollout-timeline__legend flex flex-wrap items-center gap-10 mb-10">
         <button
           v-for="item in legendItems"
@@ -413,8 +462,8 @@ function onLegendPhaseClick(phaseKey: string) {
           type="button"
           class="rollout-timeline__legend-item flex items-center gap-5"
           :class="{
-            'rollout-timeline__legend-item--selected': selectedPhaseKey === item.key,
-            'rollout-timeline__legend-item--dimmed': selectedPhaseKey != null && selectedPhaseKey !== item.key,
+            'rollout-timeline__legend-item--selected': isLegendPhaseHighlighted(item.key),
+            'rollout-timeline__legend-item--dimmed': selectedPhaseKey != null && !isLegendPhaseHighlighted(item.key),
           }"
           :aria-pressed="selectedPhaseKey === item.key"
           @click="onLegendPhaseClick(item.key)"
@@ -717,6 +766,21 @@ function onLegendPhaseClick(phaseKey: string) {
   top: 0;
   pointer-events: none;
   z-index: 5;
+}
+
+.rollout-timeline__phase-count-mode-item {
+  background: white;
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  color: var(--color-primary-700, #006874);
+  cursor: pointer;
+}
+
+.rollout-timeline__phase-count-mode-item:hover,
+.rollout-timeline__phase-count-mode-item--selected {
+  border-color: var(--color-primary-600, #00838f);
+  background: color-mix(in srgb, var(--color-primary-600, #00838f) 8%, white);
 }
 
 .rollout-timeline__legend-item {

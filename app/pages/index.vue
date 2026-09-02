@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { buildTimelineRows, formatDatenstand, PHASE_DEFINITIONS } from '~/utils/datenkatalog-data'
+import {
+  buildKpisFromRows,
+  buildTimelineRows,
+  formatDatenstand,
+  PHASE_DEFINITIONS,
+  type PhaseCountMode,
+} from '~/utils/datenkatalog-data'
 
 useHead({
   title: 'Datenkatalog – Umsetzungsstand | Kanton Basel-Stadt',
@@ -7,14 +13,23 @@ useHead({
 
 const { data, pending, error } = await useDatenkatalogData()
 
-const kpis = computed(() => data.value?.kpis ?? [])
+const phaseCountMode = ref<PhaseCountMode>('cumulative')
+
+const phaseCountModeItems = [
+  { value: 'cumulative' as const, label: 'Kumulativ' },
+  { value: 'current' as const, label: 'Aktuell' },
+]
+
+const kpis = computed(() =>
+  buildKpisFromRows(data.value?.rows ?? [], phaseCountMode.value),
+)
 const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
 const datenstand = computed(() => {
   const isoDate = data.value?.dataProcessedDate
   return isoDate ? formatDatenstand(isoDate) : null
 })
 
-/** null = show all; otherwise only Dienststellen currently in that phase */
+/** null = show all; otherwise filter by selected phase (semantics follow phaseCountMode) */
 const selectedPhaseKey = ref<string | null>(null)
 
 function togglePhaseFilter(phaseKey: string) {
@@ -30,7 +45,11 @@ const filteredTimelineRows = computed(() => {
   if (!phaseKey) {
     return timelineRows.value
   }
-  return timelineRows.value.filter((row) => row.currentPhaseKey === phaseKey)
+  if (phaseCountMode.value === 'current') {
+    return timelineRows.value.filter((row) => row.currentPhaseKey === phaseKey)
+  }
+  const phaseIndex = PHASE_DEFINITIONS.findIndex((phase) => phase.key === phaseKey)
+  return timelineRows.value.filter((row) => row.phaseRank >= phaseIndex)
 })
 </script>
 
@@ -52,7 +71,7 @@ const filteredTimelineRows = computed(() => {
           Es zeigt damit, wie die Metadatenerfassung der kantonalen Datenbestände voranschreitet.
         </p>
         <p>
-          Im Dashboard erscheinen nur Dienststellen, mit denen bereits Kontakt zur Umsetzung aufenommen wurde – entweder
+          Im Dashboard erscheinen nur Dienststellen, mit denen bereits Kontakt zur Umsetzung aufgenommen wurde – entweder
           durch das DCC oder auf Initiative der Dienststelle.
           Nicht aufgeführte Dienststellen stehen bislang noch nicht im Austausch mit dem DCC.
         </p>
@@ -74,12 +93,31 @@ const filteredTimelineRows = computed(() => {
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Die folgenden Kennzahlen zeigen, wie viele Dienststellen die jeweilige Phase kumulativ bereits
-            durchlaufen bzw. erreicht haben. Eine Erklärung für die jeweilige Phase wird beim Überfahren
+            Die folgenden Kennzahlen zeigen, wie viele Dienststellen die jeweilige Phase bereits
+            durchlaufen bzw. erreicht haben – kumulativ oder nur in der aktuellen Phase.
+            Eine Erklärung für die jeweilige Phase wird beim Überfahren
             bzw. Antippen des Informations-Icons angezeigt.
             Der Zeitstrahl visualisiert die erreichten Termine pro begleitete Dienststelle bzw. Fachstelle.
           </p>
         </div>
+      </div>
+
+      <div
+        class="phase-count-mode flex flex-wrap items-center gap-5 mb-20"
+        role="group"
+        aria-label="Zählweise der Kennzahlen"
+      >
+        <button
+          v-for="item in phaseCountModeItems"
+          :key="item.value"
+          type="button"
+          class="phase-count-mode__item text-xs"
+          :class="{ 'phase-count-mode__item--selected': phaseCountMode === item.value }"
+          :aria-pressed="phaseCountMode === item.value"
+          @click="phaseCountMode = item.value"
+        >
+          {{ item.label }}
+        </button>
       </div>
 
       <div
@@ -131,7 +169,7 @@ const filteredTimelineRows = computed(() => {
           <p>
             Übersicht der erreichten Termine je begleitete Dienststelle und Projektphase, ab
             Dezember 2025 bis heute. Durch Klicken auf eine Phase in der Legende werden
-            die Dienststellen nach ihrem aktuellen Projektstand gefiltert.
+            die Dienststellen nach Phase gefiltert – kumulativ oder nach aktuellem Projektstand.
             Für weiterführende Erklärungen bitte den Abschnitt
             <a href="#anmerkungen">«Anmerkungen»</a> konsultieren.
           </p>
@@ -152,6 +190,7 @@ const filteredTimelineRows = computed(() => {
       </div>
       <DienststellenTimeline
         v-else
+        v-model:phase-count-mode="phaseCountMode"
         :rows="filteredTimelineRows"
         :selected-phase-key="selectedPhaseKey"
         :datenstand="datenstand"
@@ -210,5 +249,24 @@ const filteredTimelineRows = computed(() => {
 <style scoped>
 :deep(.kpi-card__intro) {
   padding-right: 28px;
+}
+
+.phase-count-mode__item {
+  background: white;
+  border: 1px solid var(--color-gray-300, #d1d5db);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  color: var(--color-primary-700, #006874);
+  cursor: pointer;
+}
+
+.phase-count-mode__item:hover {
+  border-color: var(--color-primary-600, #00838f);
+  background: color-mix(in srgb, var(--color-primary-600, #00838f) 8%, white);
+}
+
+.phase-count-mode__item--selected {
+  border-color: var(--color-primary-600, #00838f);
+  background: color-mix(in srgb, var(--color-primary-600, #00838f) 8%, white);
 }
 </style>
