@@ -252,6 +252,12 @@ interface EdgeArrow {
   side: 'left' | 'right'
   y: number
   colorClass: string
+  row: TimelineRow
+  milestone: TimelineMilestone
+  targetX: number
+  hitX: number
+  hitY: number
+  hitSize: number
 }
 
 /**
@@ -276,13 +282,46 @@ const edgeArrows = computed<EdgeArrow[]>(() => {
     const lastX = xScale.value(clampToTimelineStart(lastMilestone.date))
     const y = rowY(rowIndex) + ROW_HEIGHT / 2
     if (lastX < viewLeft) {
-      arrows.push({ key: `${row.posten}-left`, side: 'left', y, colorClass: lastMilestone.colorClass })
+      arrows.push(buildEdgeArrow({
+        key: `${row.posten}-left`,
+        side: 'left',
+        y,
+        colorClass: lastMilestone.colorClass,
+        row,
+        milestone: lastMilestone,
+        targetX: lastX,
+      }))
     } else if (firstX > viewRight) {
-      arrows.push({ key: `${row.posten}-right`, side: 'right', y, colorClass: firstMilestone.colorClass })
+      arrows.push(buildEdgeArrow({
+        key: `${row.posten}-right`,
+        side: 'right',
+        y,
+        colorClass: firstMilestone.colorClass,
+        row,
+        milestone: firstMilestone,
+        targetX: firstX,
+      }))
     }
   })
   return arrows
 })
+
+function buildEdgeArrow(
+  base: Omit<EdgeArrow, 'hitX' | 'hitY' | 'hitSize'>,
+): EdgeArrow {
+  const hitSize = milestoneHitSize(base.row, base.milestone)
+  const half = hitSize / 2
+  const centerX =
+    base.side === 'left'
+      ? EDGE_ARROW_INSET + EDGE_ARROW_SIZE / 2
+      : viewportWidth.value - EDGE_ARROW_INSET - EDGE_ARROW_SIZE / 2
+  return {
+    ...base,
+    hitX: centerX - half,
+    hitY: base.y - half,
+    hitSize,
+  }
+}
 
 function arrowPoints(arrow: EdgeArrow) {
   const { side, y } = arrow
@@ -294,6 +333,21 @@ function arrowPoints(arrow: EdgeArrow) {
   const tipX = viewportWidth.value - EDGE_ARROW_INSET
   const baseX = tipX - EDGE_ARROW_SIZE
   return `${tipX},${y} ${baseX},${y - EDGE_ARROW_SIZE} ${baseX},${y + EDGE_ARROW_SIZE}`
+}
+
+function onEdgeArrowPointerDown(event: PointerEvent) {
+  event.stopPropagation()
+  event.preventDefault()
+}
+
+function onEdgeArrowClick(arrow: EdgeArrow) {
+  const halfSize = milestoneSize(arrow.row, arrow.milestone) / 2
+  const padding = YEAR_SCROLL_LEAD_IN
+  if (arrow.side === 'left') {
+    scrollTimelineTo(arrow.targetX - halfSize - padding)
+  } else {
+    scrollTimelineTo(arrow.targetX + halfSize + padding - viewportWidth.value)
+  }
 }
 
 watch(
@@ -365,7 +419,7 @@ function milestoneTitleText(milestones: TimelineMilestone[]) {
 }
 
 function showMilestone(event: PointerEvent, row: TimelineRow, milestone: TimelineMilestone) {
-  const target = event.currentTarget as SVGRectElement
+  const target = event.currentTarget as SVGGraphicsElement
   const rect = target.getBoundingClientRect()
   activeMilestone.value = {
     left: rect.left + rect.width / 2,
@@ -675,14 +729,33 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
               :width="viewportWidth"
               :height="chartHeight"
               :style="{ left: `${scrollLeft}px` }"
-              aria-hidden="true"
             >
-              <polygon
+              <g
                 v-for="arrow in edgeArrows"
                 :key="arrow.key"
-                :points="arrowPoints(arrow)"
-                :class="arrow.colorClass"
-              />
+              >
+                <polygon
+                  :points="arrowPoints(arrow)"
+                  :class="arrow.colorClass"
+                  class="pointer-events-none"
+                />
+                <rect
+                  class="rollout-timeline__edge-arrow"
+                  :x="arrow.hitX"
+                  :y="arrow.hitY"
+                  :width="arrow.hitSize"
+                  :height="arrow.hitSize"
+                  fill="transparent"
+                  role="button"
+                  :aria-label="arrow.milestone.title"
+                  @pointerdown="onEdgeArrowPointerDown"
+                  @pointerenter="showMilestone($event, arrow.row, arrow.milestone)"
+                  @pointerleave="hideMilestone"
+                  @click="onEdgeArrowClick(arrow)"
+                >
+                  <title>{{ milestoneTitleText(milestonesOnSameDate(arrow.row, arrow.milestone)) }}</title>
+                </rect>
+              </g>
             </svg>
 
             <div
@@ -766,6 +839,11 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
   top: 0;
   pointer-events: none;
   z-index: 5;
+}
+
+.rollout-timeline__edge-arrow {
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 .rollout-timeline__phase-count-mode-item {
