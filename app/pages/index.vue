@@ -72,8 +72,8 @@ const filteredTimelineRows = computed(() => {
         </p>
         <p>
           Im Dashboard erscheinen nur Dienststellen, mit denen bereits Kontakt zur Umsetzung aufgenommen wurde – entweder
-          durch das DCC oder auf Initiative der Dienststelle.
-          Nicht aufgeführte Dienststellen stehen bislang noch nicht im Austausch mit dem DCC.
+          durch das DCC Data Competence Center oder auf Initiative der Dienststelle.
+          Nicht aufgeführte Dienststellen stehen bislang noch nicht im Austausch mit dem DCC Data Competence Center.
         </p>
         <p>
           Für jede Dienststelle wird sichtbar, in welcher Phase sich die
@@ -230,7 +230,7 @@ const filteredTimelineRows = computed(() => {
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
             Möchten Sie den Rollout Ihrer Dienststelle starten? Melden Sie sich einfach
-            per E-Mail oder telefonisch bei uns. Das DCC begleitet Sie eng bei der
+            per E-Mail oder telefonisch bei uns. Das DCC Data Competence Center begleitet Sie eng bei der
             Ersterfassung und klärt gemeinsam mit Ihnen, welche Datenbestände sinnvoll im Datenkatalog
             erfasst werden und wie die Erfassung möglichst ressourcenschonend gestaltet werden kann.
           </p>

@@ -32,7 +32,7 @@ export const PHASE_DEFINITIONS = [
     laneFillClass: 'fill-gray-50',
     chipClass: 'bg-gray-100 text-gray-800',
     detailContent:
-      '<p>In der Kontaktphase findet die erste Kontaktaufnahme zwischen dem DCC und der zuständigen Dienststelle statt. Diese kann sowohl durch das DCC als auch durch die Dienststelle selbst initiiert werden. Ziel ist es, die richtige Ansprechperson zu identifizieren und den weiteren Ablauf gemeinsam abzustimmen.</p>',
+      '<p>In der Kontaktphase findet die erste Kontaktaufnahme zwischen dem DCC Data Competence Center und der zuständigen Dienststelle statt. Diese kann sowohl durch das DCC Data Competence Center als auch durch die Dienststelle selbst initiiert werden. Ziel ist es, die richtige Ansprechperson zu identifizieren und den weiteren Ablauf gemeinsam abzustimmen.</p>',
   },
   {
     key: 'informiert',
@@ -68,7 +68,7 @@ export const PHASE_DEFINITIONS = [
     laneFillClass: 'fill-green-50',
     chipClass: 'bg-green-100 text-green-800',
     detailContent:
-      '<p>Die Dienststelle erfasst die relevanten Metadaten im Kantons-Datenkatalog. Dazu zählen Beschreibungen der Datensätze, Verantwortlichkeiten, Aktualisierungszyklen und ggf. Veröffentlichungsstatus. Das DCC begleitet die Erfassung und steht für die Abstimmung zu Umfang, Auswahl und Beschreibung der Datensätze zur Verfügung.</p>',
+      '<p>Die Dienststelle erfasst die relevanten Metadaten im Kantons-Datenkatalog. Dazu zählen Beschreibungen der Datensätze, Verantwortlichkeiten, Aktualisierungszyklen und ggf. Veröffentlichungsstatus. Das DCC Data Competence Center begleitet die Erfassung und steht für die Abstimmung zu Umfang, Auswahl und Beschreibung der Datensätze zur Verfügung.</p>',
   },
   {
     key: 'review',
