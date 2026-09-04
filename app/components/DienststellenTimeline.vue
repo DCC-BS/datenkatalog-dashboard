@@ -2,35 +2,35 @@
 import * as d3 from 'd3'
 import {
   clampToTimelineBounds,
-  PHASE_DEFINITIONS,
+  STEP_DEFINITIONS,
   TIMELINE_START_DATE,
-  type PhaseCountMode,
-  type TimelineMilestone,
+  type StepCountMode,
+  type TimelineStepMarker,
   type TimelineRow,
 } from '~/utils/datenkatalog-data'
 
 const props = defineProps<{
   rows: TimelineRow[]
-  selectedPhaseKey?: string | null
-  phaseCountMode?: PhaseCountMode
+  selectedStepKey?: string | null
+  stepCountMode?: StepCountMode
   datenstand?: string | null
 }>()
 
 const emit = defineEmits<{
-  'select-phase': [phaseKey: string]
-  'update:phaseCountMode': [mode: PhaseCountMode]
+  'select-step': [stepKey: string]
+  'update:stepCountMode': [mode: StepCountMode]
 }>()
 
-const phaseCountModeItems = [
+const stepCountModeItems = [
   { value: 'cumulative' as const, label: 'Kumulativ' },
   { value: 'current' as const, label: 'Aktuell' },
 ]
 
 const ROW_HEIGHT = 36
-const MILESTONE_SIZE = 12
-const MILESTONE_HIT_SIZE = 20
-const CURRENT_MILESTONE_SIZE = 16
-const CURRENT_MILESTONE_HIT_SIZE = 24
+const STEP_MARKER_SIZE = 12
+const STEP_MARKER_HIT_SIZE = 20
+const CURRENT_STEP_MARKER_SIZE = 16
+const CURRENT_STEP_MARKER_HIT_SIZE = 24
 const GROUP_HEADER_HEIGHT = 24
 const AXIS_HEIGHT = 28
 const PX_PER_DAY = 6
@@ -45,7 +45,7 @@ const today = new Date()
 const formatDate = d3.timeFormat('%d.%m.%Y')
 
 /**
- * Formats a milestone date for hover display: dates before TIMELINE_START_DATE
+ * Formats a step marker date for hover display: dates before TIMELINE_START_DATE
  * collapse to "vor 01.12.2025"; future (planned) dates show as
  * "geplant am DD.MM.YYYY" with the actual date.
  */
@@ -99,7 +99,7 @@ const timelineStart = new Date(TIMELINE_START_DATE)
 
 /**
  * Fixed extent, independent of the rows on screen, so the axis and the chart
- * width stay put while the phase filter changes which Dienststellen are shown.
+ * width stay put while the step filter changes which Dienststellen are shown.
  */
 const timeDomain = computed<[Date, Date]>(() => [
   timelineStart,
@@ -120,15 +120,15 @@ const chartWidth = computed(() => {
 
 /**
  * Absolute top offset for each row, accounting for the height of every lane
- * group header rendered above it. Rows sharing the same currentPhaseKey are
- * contiguous (rows are sorted by phaseRank), so a new header is inserted
- * whenever the phase key changes.
+ * group header rendered above it. Rows sharing the same currentStepKey are
+ * contiguous (rows are sorted by stepRank), so a new header is inserted
+ * whenever the step key changes.
  */
 const rowTops = computed<number[]>(() => {
   const tops: number[] = []
   let headerCount = 0
   props.rows.forEach((row, index) => {
-    const isGroupStart = index === 0 || row.currentPhaseKey !== props.rows[index - 1].currentPhaseKey
+    const isGroupStart = index === 0 || row.currentStepKey !== props.rows[index - 1].currentStepKey
     if (isGroupStart) {
       headerCount += 1
     }
@@ -147,18 +147,18 @@ interface LaneGroup {
   height: number
 }
 
-/** One entry per contiguous block of rows sharing the same current phase. */
+/** One entry per contiguous block of rows sharing the same current step. */
 const laneGroups = computed<LaneGroup[]>(() => {
   const groups: LaneGroup[] = []
   props.rows.forEach((row, index) => {
-    const isGroupStart = index === 0 || row.currentPhaseKey !== props.rows[index - 1].currentPhaseKey
+    const isGroupStart = index === 0 || row.currentStepKey !== props.rows[index - 1].currentStepKey
     const top = rowTops.value[index]
     if (isGroupStart) {
       groups.push({
-        key: row.currentPhaseKey,
-        title: row.currentPhaseTitle,
+        key: row.currentStepKey,
+        title: row.currentStepTitle,
         count: 1,
-        laneFillClass: row.currentPhaseLaneFillClass,
+        laneFillClass: row.currentStepLaneFillClass,
         startIndex: index,
         top,
         height: ROW_HEIGHT,
@@ -233,28 +233,28 @@ const axisTickLabels = computed<AxisTickLabel[]>(() => {
 })
 
 const legendItems = computed(() =>
-  PHASE_DEFINITIONS.map((phase) => ({
-    key: phase.key,
-    title: phase.title,
-    swatchClass: phase.legendSwatchClass,
+  STEP_DEFINITIONS.map((step) => ({
+    key: step.key,
+    title: step.title,
+    swatchClass: step.legendSwatchClass,
   })),
 )
 
 /**
- * Visual highlight for legend phases. In cumulative mode, the selected phase
- * and all later phases are highlighted (filter shows rows that reached any of them).
- * Click/toggle state remains selectedPhaseKey only.
+ * Visual highlight for legend steps. In cumulative mode, the selected step
+ * and all later steps are highlighted (filter shows rows that reached any of them).
+ * Click/toggle state remains selectedStepKey only.
  */
-function isLegendPhaseHighlighted(phaseKey: string): boolean {
-  const selected = props.selectedPhaseKey
+function isLegendStepHighlighted(stepKey: string): boolean {
+  const selected = props.selectedStepKey
   if (selected == null) {
     return false
   }
-  if (props.phaseCountMode !== 'cumulative') {
-    return selected === phaseKey
+  if (props.stepCountMode !== 'cumulative') {
+    return selected === stepKey
   }
-  const selectedIndex = PHASE_DEFINITIONS.findIndex((phase) => phase.key === selected)
-  const itemIndex = PHASE_DEFINITIONS.findIndex((phase) => phase.key === phaseKey)
+  const selectedIndex = STEP_DEFINITIONS.findIndex((step) => step.key === selected)
+  const itemIndex = STEP_DEFINITIONS.findIndex((step) => step.key === stepKey)
   return selectedIndex >= 0 && itemIndex >= selectedIndex
 }
 
@@ -262,21 +262,21 @@ function rowY(rowIndex: number) {
   return rowTops.value[rowIndex] ?? rowIndex * ROW_HEIGHT
 }
 
-function milestoneSize(row: TimelineRow, milestone: TimelineMilestone) {
-  return milestone.key === row.currentPhaseKey ? CURRENT_MILESTONE_SIZE : MILESTONE_SIZE
+function stepMarkerSize(row: TimelineRow, step: TimelineStepMarker) {
+  return step.key === row.currentStepKey ? CURRENT_STEP_MARKER_SIZE : STEP_MARKER_SIZE
 }
 
-function milestoneHitSize(row: TimelineRow, milestone: TimelineMilestone) {
-  return milestone.key === row.currentPhaseKey ? CURRENT_MILESTONE_HIT_SIZE : MILESTONE_HIT_SIZE
+function stepMarkerHitSize(row: TimelineRow, step: TimelineStepMarker) {
+  return step.key === row.currentStepKey ? CURRENT_STEP_MARKER_HIT_SIZE : STEP_MARKER_HIT_SIZE
 }
 
-interface ActiveMilestone {
+interface ActiveStepMarker {
   left: number
   top: number
-  items: TimelineMilestone[]
+  items: TimelineStepMarker[]
 }
 
-const activeMilestone = ref<ActiveMilestone | null>(null)
+const activeStepMarker = ref<ActiveStepMarker | null>(null)
 const scrollEl = ref<HTMLElement | null>(null)
 
 /** Mouse grab-to-pan; touch/trackpad keep native overflow scrolling. */
@@ -285,7 +285,7 @@ let dragPointerId: number | null = null
 let dragStartX = 0
 let dragStartScrollLeft = 0
 
-/** Visible scroll window, used to detect rows whose milestones are fully out of view. */
+/** Visible scroll window, used to detect rows whose steps are fully out of view. */
 const scrollLeft = ref(0)
 const viewportWidth = ref(0)
 let resizeObserver: ResizeObserver | null = null
@@ -305,7 +305,7 @@ interface EdgeArrow {
   y: number
   colorClass: string
   row: TimelineRow
-  milestone: TimelineMilestone
+  step: TimelineStepMarker
   targetX: number
   hitX: number
   hitY: number
@@ -313,9 +313,9 @@ interface EdgeArrow {
 }
 
 /**
- * At most one arrow per row: shown only when a row's entire milestone span
+ * At most one arrow per row: shown only when a row's entire step span
  * (first to last) is scrolled fully out of view on one side, pointing the
- * user toward it. Colored after the milestone nearer to the viewport.
+ * user toward it. Colored after the step nearer to the viewport.
  */
 const edgeArrows = computed<EdgeArrow[]>(() => {
   if (viewportWidth.value <= 0) {
@@ -325,22 +325,22 @@ const edgeArrows = computed<EdgeArrow[]>(() => {
   const viewRight = scrollLeft.value + viewportWidth.value
   const arrows: EdgeArrow[] = []
   props.rows.forEach((row, rowIndex) => {
-    if (row.milestones.length === 0) {
+    if (row.steps.length === 0) {
       return
     }
-    const firstMilestone = row.milestones[0]!
-    const lastMilestone = row.milestones[row.milestones.length - 1]!
-    const firstX = xScale.value(clampToTimelineBounds(firstMilestone.date))
-    const lastX = xScale.value(clampToTimelineBounds(lastMilestone.date))
+    const firstStep = row.steps[0]!
+    const lastStep = row.steps[row.steps.length - 1]!
+    const firstX = xScale.value(clampToTimelineBounds(firstStep.date))
+    const lastX = xScale.value(clampToTimelineBounds(lastStep.date))
     const y = rowY(rowIndex) + ROW_HEIGHT / 2
     if (lastX < viewLeft) {
       arrows.push(buildEdgeArrow({
         key: `${row.posten}-left`,
         side: 'left',
         y,
-        colorClass: lastMilestone.colorClass,
+        colorClass: lastStep.colorClass,
         row,
-        milestone: lastMilestone,
+        step: lastStep,
         targetX: lastX,
       }))
     } else if (firstX > viewRight) {
@@ -348,9 +348,9 @@ const edgeArrows = computed<EdgeArrow[]>(() => {
         key: `${row.posten}-right`,
         side: 'right',
         y,
-        colorClass: firstMilestone.colorClass,
+        colorClass: firstStep.colorClass,
         row,
-        milestone: firstMilestone,
+        step: firstStep,
         targetX: firstX,
       }))
     }
@@ -361,7 +361,7 @@ const edgeArrows = computed<EdgeArrow[]>(() => {
 function buildEdgeArrow(
   base: Omit<EdgeArrow, 'hitX' | 'hitY' | 'hitSize'>,
 ): EdgeArrow {
-  const hitSize = milestoneHitSize(base.row, base.milestone)
+  const hitSize = stepMarkerHitSize(base.row, base.step)
   const half = hitSize / 2
   const centerX =
     base.side === 'left'
@@ -393,7 +393,7 @@ function onEdgeArrowPointerDown(event: PointerEvent) {
 }
 
 function onEdgeArrowClick(arrow: EdgeArrow) {
-  const halfSize = milestoneSize(arrow.row, arrow.milestone) / 2
+  const halfSize = stepMarkerSize(arrow.row, arrow.step) / 2
   const padding = YEAR_SCROLL_LEAD_IN
   if (arrow.side === 'left') {
     scrollTimelineTo(arrow.targetX - halfSize - padding)
@@ -405,7 +405,7 @@ function onEdgeArrowClick(arrow: EdgeArrow) {
 watch(
   () => props.rows,
   () => {
-    activeMilestone.value = null
+    activeStepMarker.value = null
   },
 )
 
@@ -460,32 +460,32 @@ function scrollToToday() {
   }
 }
 
-function milestonesOnSameDate(row: TimelineRow, milestone: TimelineMilestone) {
-  return row.milestones.filter((candidate) => candidate.date === milestone.date)
+function stepsOnSameDate(row: TimelineRow, step: TimelineStepMarker) {
+  return row.steps.filter((candidate) => candidate.date === step.date)
 }
 
-function milestoneTitleText(milestones: TimelineMilestone[]) {
-  return milestones
-    .map((milestone) => `${milestone.title}: ${formatHoverDate(new Date(milestone.date))}`)
+function stepMarkerTitleText(steps: TimelineStepMarker[]) {
+  return steps
+    .map((step) => `${step.title}: ${formatHoverDate(new Date(step.date))}`)
     .join('\n')
 }
 
-function showMilestone(event: PointerEvent, row: TimelineRow, milestone: TimelineMilestone) {
+function showStepMarker(event: PointerEvent, row: TimelineRow, step: TimelineStepMarker) {
   const target = event.currentTarget as SVGGraphicsElement
   const rect = target.getBoundingClientRect()
-  activeMilestone.value = {
+  activeStepMarker.value = {
     left: rect.left + rect.width / 2,
     top: rect.top,
-    items: milestonesOnSameDate(row, milestone),
+    items: stepsOnSameDate(row, step),
   }
 }
 
-function hideMilestone() {
-  activeMilestone.value = null
+function hideStepMarker() {
+  activeStepMarker.value = null
 }
 
 function onTimelineScroll() {
-  hideMilestone()
+  hideStepMarker()
   updateViewportMetrics()
 }
 
@@ -524,39 +524,39 @@ function endScrollDrag(event: PointerEvent) {
   dragPointerId = null
 }
 
-function onLegendPhaseClick(phaseKey: string) {
-  emit('select-phase', phaseKey)
+function onLegendStepClick(stepKey: string) {
+  emit('select-step', stepKey)
 }
 
-function onPhaseCountModeClick(mode: PhaseCountMode) {
-  emit('update:phaseCountMode', mode)
+function onStepCountModeClick(mode: StepCountMode) {
+  emit('update:stepCountMode', mode)
 }
 </script>
 
 <template>
   <div class="rollout-timeline">
     <div
-      v-if="rows.length === 0 && !selectedPhaseKey"
+      v-if="rows.length === 0 && !selectedStepKey"
       class="text-primary-600"
     >
       Aktuell sind keine Dienststellen in Bearbeitung.
     </div>
     <template v-else>
       <div
-        class="rollout-timeline__phase-count-mode flex flex-wrap items-center gap-5 mb-10"
+        class="rollout-timeline__step-count-mode flex flex-wrap items-center gap-5 mb-10"
         role="group"
         aria-label="Zählweise der Kennzahlen"
       >
         <button
-          v-for="item in phaseCountModeItems"
+          v-for="item in stepCountModeItems"
           :key="item.value"
           type="button"
-          class="rollout-timeline__phase-count-mode-item text-xs"
+          class="rollout-timeline__step-count-mode-item text-xs"
           :class="{
-            'rollout-timeline__phase-count-mode-item--selected': phaseCountMode === item.value,
+            'rollout-timeline__step-count-mode-item--selected': stepCountMode === item.value,
           }"
-          :aria-pressed="phaseCountMode === item.value"
-          @click="onPhaseCountModeClick(item.value)"
+          :aria-pressed="stepCountMode === item.value"
+          @click="onStepCountModeClick(item.value)"
         >
           {{ item.label }}
         </button>
@@ -568,11 +568,11 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
           type="button"
           class="rollout-timeline__legend-item flex items-center gap-5"
           :class="{
-            'rollout-timeline__legend-item--selected': isLegendPhaseHighlighted(item.key),
-            'rollout-timeline__legend-item--dimmed': selectedPhaseKey != null && !isLegendPhaseHighlighted(item.key),
+            'rollout-timeline__legend-item--selected': isLegendStepHighlighted(item.key),
+            'rollout-timeline__legend-item--dimmed': selectedStepKey != null && !isLegendStepHighlighted(item.key),
           }"
-          :aria-pressed="selectedPhaseKey === item.key"
-          @click="onLegendPhaseClick(item.key)"
+          :aria-pressed="selectedStepKey === item.key"
+          @click="onLegendStepClick(item.key)"
         >
           <span
             class="inline-block w-10 h-10 rounded-sm"
@@ -609,7 +609,7 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
         v-if="rows.length === 0"
         class="text-primary-600"
       >
-        Keine Dienststellen in dieser Phase.
+        Keine Dienststellen mit diesem Schritt.
       </div>
       <div
         v-else
@@ -690,7 +690,7 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
               :width="chartWidth"
               :height="chartHeight"
               role="img"
-              aria-label="Zeitstrahl der Umsetzungsphasen je Dienststelle"
+              aria-label="Zeitstrahl der Umsetzungsschritte je Dienststelle"
             >
               <rect
                 v-for="group in laneGroups"
@@ -740,28 +740,28 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
                   stroke-dasharray="4 3"
                 />
                 <rect
-                  v-for="milestone in row.milestones"
-                  :key="milestone.key"
-                  :x="xScale(clampToTimelineBounds(milestone.date)) - milestoneSize(row, milestone) / 2"
-                  :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneSize(row, milestone) / 2"
-                  :width="milestoneSize(row, milestone)"
-                  :height="milestoneSize(row, milestone)"
+                  v-for="step in row.steps"
+                  :key="step.key"
+                  :x="xScale(clampToTimelineBounds(step.date)) - stepMarkerSize(row, step) / 2"
+                  :y="rowY(rowIndex) + ROW_HEIGHT / 2 - stepMarkerSize(row, step) / 2"
+                  :width="stepMarkerSize(row, step)"
+                  :height="stepMarkerSize(row, step)"
                   rx="2"
-                  :class="milestone.colorClass"
+                  :class="step.colorClass"
                   class="pointer-events-none"
                 />
                 <rect
-                  v-for="milestone in row.milestones"
-                  :key="`hit-${milestone.key}`"
-                  :x="xScale(clampToTimelineBounds(milestone.date)) - milestoneHitSize(row, milestone) / 2"
-                  :y="rowY(rowIndex) + ROW_HEIGHT / 2 - milestoneHitSize(row, milestone) / 2"
-                  :width="milestoneHitSize(row, milestone)"
-                  :height="milestoneHitSize(row, milestone)"
+                  v-for="step in row.steps"
+                  :key="`hit-${step.key}`"
+                  :x="xScale(clampToTimelineBounds(step.date)) - stepMarkerHitSize(row, step) / 2"
+                  :y="rowY(rowIndex) + ROW_HEIGHT / 2 - stepMarkerHitSize(row, step) / 2"
+                  :width="stepMarkerHitSize(row, step)"
+                  :height="stepMarkerHitSize(row, step)"
                   fill="transparent"
-                  @pointerenter="showMilestone($event, row, milestone)"
-                  @pointerleave="hideMilestone"
+                  @pointerenter="showStepMarker($event, row, step)"
+                  @pointerleave="hideStepMarker"
                 >
-                  <title>{{ milestoneTitleText(milestonesOnSameDate(row, milestone)) }}</title>
+                  <title>{{ stepMarkerTitleText(stepsOnSameDate(row, step)) }}</title>
                 </rect>
               </g>
 
@@ -800,24 +800,24 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
                   :height="arrow.hitSize"
                   fill="transparent"
                   role="button"
-                  :aria-label="arrow.milestone.title"
+                  :aria-label="arrow.step.title"
                   @pointerdown="onEdgeArrowPointerDown"
-                  @pointerenter="showMilestone($event, arrow.row, arrow.milestone)"
-                  @pointerleave="hideMilestone"
+                  @pointerenter="showStepMarker($event, arrow.row, arrow.step)"
+                  @pointerleave="hideStepMarker"
                   @click="onEdgeArrowClick(arrow)"
                 >
-                  <title>{{ milestoneTitleText(milestonesOnSameDate(arrow.row, arrow.milestone)) }}</title>
+                  <title>{{ stepMarkerTitleText(stepsOnSameDate(arrow.row, arrow.step)) }}</title>
                 </rect>
               </g>
             </svg>
 
             <div
-              v-if="activeMilestone"
+              v-if="activeStepMarker"
               class="rollout-timeline__tooltip fixed bg-white border border-gray-300 rounded text-xs px-10 py-5 shadow-md"
-              :style="{ left: `${activeMilestone.left}px`, top: `${activeMilestone.top}px` }"
+              :style="{ left: `${activeStepMarker.left}px`, top: `${activeStepMarker.top}px` }"
             >
               <div
-                v-for="(item, index) in activeMilestone.items"
+                v-for="(item, index) in activeStepMarker.items"
                 :key="item.key"
                 :class="{ 'mt-5': index > 0 }"
               >
@@ -843,10 +843,10 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
               >
                 <span
                   class="rollout-timeline__status-chip inline-block max-w-full truncate rounded-sm px-5 text-[11px] font-medium"
-                  :class="item.row.currentPhaseChipClass"
-                  :title="item.row.currentPhaseTitle"
+                  :class="item.row.currentStepChipClass"
+                  :title="item.row.currentStepTitle"
                 >
-                  {{ item.row.currentPhaseTitle }}
+                  {{ item.row.currentStepTitle }}
                 </span>
               </div>
             </template>
@@ -899,7 +899,7 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
   cursor: pointer;
 }
 
-.rollout-timeline__phase-count-mode-item {
+.rollout-timeline__step-count-mode-item {
   background: white;
   border: 1px solid var(--color-gray-300, #d1d5db);
   border-radius: 0.25rem;
@@ -908,8 +908,8 @@ function onPhaseCountModeClick(mode: PhaseCountMode) {
   cursor: pointer;
 }
 
-.rollout-timeline__phase-count-mode-item:hover,
-.rollout-timeline__phase-count-mode-item--selected {
+.rollout-timeline__step-count-mode-item:hover,
+.rollout-timeline__step-count-mode-item--selected {
   border-color: var(--color-primary-600, #00838f);
   background: color-mix(in srgb, var(--color-primary-600, #00838f) 8%, white);
 }

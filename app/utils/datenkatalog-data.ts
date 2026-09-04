@@ -18,10 +18,10 @@ export interface DatenkatalogKpi {
   count: number
 }
 
-/** How phase KPI counts and the timeline phase filter interpret a phase. */
-export type PhaseCountMode = 'cumulative' | 'current'
+/** How step KPI counts and the timeline step filter interpret a step. */
+export type StepCountMode = 'cumulative' | 'current'
 
-export const PHASE_DEFINITIONS = [
+export const STEP_DEFINITIONS = [
   {
     key: 'kontaktiert',
     field: 'status_kontaktiert',
@@ -32,7 +32,7 @@ export const PHASE_DEFINITIONS = [
     laneFillClass: 'fill-gray-50',
     chipClass: 'bg-gray-100 text-gray-800',
     detailContent:
-      '<p>In der Kontaktphase findet die erste Kontaktaufnahme zwischen dem DCC Data Competence Center und der zuständigen Dienststelle statt. Diese kann sowohl durch das DCC Data Competence Center als auch durch die Dienststelle selbst initiiert werden. Ziel ist es, die richtige Ansprechperson zu identifizieren und den weiteren Ablauf gemeinsam abzustimmen.</p>',
+      '<p>Mit dem Schritt «Kontaktiert» ist die erste Kontaktaufnahme zwischen dem DCC Data Competence Center und der zuständigen Dienststelle erfolgt. Diese kann sowohl durch das DCC Data Competence Center als auch durch die Dienststelle selbst initiiert werden. Ziel ist es, die richtige Ansprechperson zu identifizieren und den weiteren Ablauf gemeinsam abzustimmen.</p>',
   },
   {
     key: 'informiert',
@@ -44,7 +44,7 @@ export const PHASE_DEFINITIONS = [
     laneFillClass: 'fill-green-50',
     chipClass: 'bg-green-100 text-green-800',
     detailContent:
-      '<p>Die Dienststelle wird über Ziele, Nutzen und Ablauf des Datenkatalogs informiert. Dazu gehören Zeitplan, Erwartungen an die Metadatenerfassung sowie unterstützende Materialien.</p>',
+      '<p>Mit dem Schritt «Informiert» ist die Dienststelle über Ziele, Nutzen und Ablauf des Datenkatalogs informiert. Dazu gehören Zeitplan, Erwartungen an die Metadatenerfassung sowie unterstützende Materialien.</p>',
   },
   {
     key: 'kickoff',
@@ -56,7 +56,7 @@ export const PHASE_DEFINITIONS = [
     laneFillClass: 'fill-green-50',
     chipClass: 'bg-green-100 text-green-800',
     detailContent:
-      '<p>Im Kick-off-Termin starten Dienststelle und Projektteam die gemeinsame Umsetzung. Rollen, Verantwortlichkeiten und die nächsten Schritte werden festgelegt.</p>',
+      '<p>Mit dem Schritt «Kick-Off» starten Dienststelle und Projektteam die gemeinsame Umsetzung. Rollen, Verantwortlichkeiten und die nächsten Schritte werden festgelegt.</p>',
   },
   {
     key: 'metadaten',
@@ -68,7 +68,7 @@ export const PHASE_DEFINITIONS = [
     laneFillClass: 'fill-green-50',
     chipClass: 'bg-green-100 text-green-800',
     detailContent:
-      '<p>Die Dienststelle erfasst die relevanten Metadaten im Kantons-Datenkatalog. Dazu zählen Beschreibungen der Datensätze, Verantwortlichkeiten, Aktualisierungszyklen und ggf. Veröffentlichungsstatus. Das DCC Data Competence Center begleitet die Erfassung und steht für die Abstimmung zu Umfang, Auswahl und Beschreibung der Datensätze zur Verfügung.</p>',
+      '<p>Mit dem Schritt «Beginn Metadatenerfassung» startet die Erfassung der relevanten Metadaten im Kantons-Datenkatalog. Dazu zählen Beschreibungen der Datensätze, Verantwortlichkeiten, Aktualisierungszyklen und ggf. Veröffentlichungsstatus. Das DCC Data Competence Center begleitet die Erfassung und steht für die Abstimmung zu Umfang, Auswahl und Beschreibung der Datensätze zur Verfügung.</p>',
   },
   {
     key: 'review',
@@ -80,7 +80,7 @@ export const PHASE_DEFINITIONS = [
     laneFillClass: 'fill-yellow-50',
     chipClass: 'bg-yellow-100 text-yellow-800',
     detailContent:
-      '<p>Die erfassten Metadaten werden fachlich geprüft. Feedback wird eingearbeitet, bis die Dienststelle die Inhalte inhaltlich abgenommen hat.</p>',
+      '<p>Mit dem Schritt «Review» werden die erfassten Metadaten fachlich geprüft. Feedback wird eingearbeitet, bis die Dienststelle die Inhalte inhaltlich abgenommen hat.</p>',
   },
   {
     key: 'abgenommen',
@@ -92,7 +92,7 @@ export const PHASE_DEFINITIONS = [
     laneFillClass: 'fill-purple-50',
     chipClass: 'bg-purple-100 text-purple-800',
     detailContent:
-      '<p>Mit der offiziellen Abnahme ist die Umsetzung für die Dienststelle formell abgeschlossen. Die Metadaten gelten als freigegeben und werden im Datenkatalog entsprechend geführt.</p>',
+      '<p>Mit dem Schritt «Abnahme» ist die Umsetzung für die Dienststelle formell abgeschlossen. Die Metadaten gelten als freigegeben und werden im Datenkatalog entsprechend geführt.</p>',
   },
 ] as const satisfies ReadonlyArray<{
   key: string
@@ -132,32 +132,32 @@ function isDatenkatalogRow(value: unknown): value is DatenkatalogRow {
   return typeof row.departement === 'string' && typeof row.posten === 'string'
 }
 
-function hasPhaseValue(value: string | null | undefined): boolean {
+function hasStepValue(value: string | null | undefined): boolean {
   return value != null && String(value).trim() !== ''
 }
 
 /**
- * Farthest phase with a date filled, or null if the row has no phase dates.
- * Same rule as timeline `currentPhaseKey`.
+ * Farthest step with a date filled, or null if the row has no step dates.
+ * Same rule as timeline `currentStepKey`.
  */
-export function getRowCurrentPhaseKey(row: DatenkatalogRow): string | null {
-  const phaseRank = PHASE_DEFINITIONS.findLastIndex((phase) =>
-    hasPhaseValue(row[phase.field]),
+export function getRowCurrentStepKey(row: DatenkatalogRow): string | null {
+  const stepRank = STEP_DEFINITIONS.findLastIndex((step) =>
+    hasStepValue(row[step.field]),
   )
-  if (phaseRank < 0) {
+  if (stepRank < 0) {
     return null
   }
-  return PHASE_DEFINITIONS[phaseRank].key
+  return STEP_DEFINITIONS[stepRank].key
 }
 
-/** True if the row has reached this phase or any later one (cumulative). */
-export function rowReachedPhase(row: DatenkatalogRow, phaseKey: string): boolean {
-  const phaseIndex = PHASE_DEFINITIONS.findIndex((phase) => phase.key === phaseKey)
-  if (phaseIndex < 0) {
+/** True if the row has reached this step or any later one (cumulative). */
+export function rowReachedStep(row: DatenkatalogRow, stepKey: string): boolean {
+  const stepIndex = STEP_DEFINITIONS.findIndex((step) => step.key === stepKey)
+  if (stepIndex < 0) {
     return false
   }
-  return PHASE_DEFINITIONS.slice(phaseIndex).some((laterPhase) =>
-    hasPhaseValue(row[laterPhase.field]),
+  return STEP_DEFINITIONS.slice(stepIndex).some((laterStep) =>
+    hasStepValue(row[laterStep.field]),
   )
 }
 
@@ -204,16 +204,16 @@ export function formatDatenstand(isoDateTime: string): string | null {
 
 export function buildKpisFromRows(
   rows: DatenkatalogRow[],
-  mode: PhaseCountMode = 'cumulative',
+  mode: StepCountMode = 'cumulative',
 ): DatenkatalogKpi[] {
-  return PHASE_DEFINITIONS.map((phase) => ({
-    key: phase.key,
-    title: phase.title,
-    description: phase.description,
+  return STEP_DEFINITIONS.map((step) => ({
+    key: step.key,
+    title: step.title,
+    description: step.description,
     count: rows.filter((row) =>
       mode === 'current'
-        ? getRowCurrentPhaseKey(row) === phase.key
-        : rowReachedPhase(row, phase.key),
+        ? getRowCurrentStepKey(row) === step.key
+        : rowReachedStep(row, step.key),
     ).length,
   }))
 }
@@ -244,7 +244,7 @@ export function clampToTimelineBounds(date: string | Date, today: Date = new Dat
   return parsed
 }
 
-export interface TimelineMilestone {
+export interface TimelineStepMarker {
   key: string
   title: string
   date: string
@@ -260,24 +260,24 @@ export interface TimelineRow {
   posten: string
   departmentAbbreviation: string
   label: string
-  phaseRank: number
+  stepRank: number
   sortDate: string
-  currentPhaseKey: string
-  currentPhaseTitle: string
-  currentPhaseLaneFillClass: string
-  currentPhaseChipClass: string
-  milestones: TimelineMilestone[]
+  currentStepKey: string
+  currentStepTitle: string
+  currentStepLaneFillClass: string
+  currentStepChipClass: string
+  steps: TimelineStepMarker[]
   connectorLine: TimelineConnectorLine | null
 }
 
 function isTimelineRow(row: DatenkatalogRow): boolean {
-  return PHASE_DEFINITIONS.some((phase) => hasPhaseValue(row[phase.field]))
+  return STEP_DEFINITIONS.some((step) => hasStepValue(row[step.field]))
 }
 
 function getSortDate(row: DatenkatalogRow): string {
-  for (const phase of PHASE_DEFINITIONS) {
-    const value = row[phase.field]
-    if (hasPhaseValue(value)) {
+  for (const step of STEP_DEFINITIONS) {
+    const value = row[step.field]
+    if (hasStepValue(value)) {
       return value as string
     }
   }
@@ -285,76 +285,76 @@ function getSortDate(row: DatenkatalogRow): string {
 }
 
 /**
- * Returns the phase definition for the current status shown for a Dienststelle.
+ * Returns the step definition for the current status shown for a Dienststelle.
  */
-function getCurrentPhase(lastPhaseKey: string) {
-  return PHASE_DEFINITIONS.find((phase) => phase.key === lastPhaseKey)!
+function getCurrentStep(lastStepKey: string) {
+  return STEP_DEFINITIONS.find((step) => step.key === lastStepKey)!
 }
 
 /**
- * Dashed connector from the first reached phase after Kontaktiert through to
+ * Dashed connector from the first reached step after Kontaktiert through to
  * Abnahme (or today if Abnahme has not been reached).
  */
 function buildConnectorLine(
   row: DatenkatalogRow,
   today: Date,
 ): TimelineConnectorLine | null {
-  const startPhase = PHASE_DEFINITIONS
-    .filter((phase) => phase.key !== 'kontaktiert')
-    .find((phase) => hasPhaseValue(row[phase.field]))
-  if (!startPhase) {
+  const startStep = STEP_DEFINITIONS
+    .filter((step) => step.key !== 'kontaktiert')
+    .find((step) => hasStepValue(row[step.field]))
+  if (!startStep) {
     return null
   }
-  const end = hasPhaseValue(row.status_abnahme_freigabe_data_owner)
+  const end = hasStepValue(row.status_abnahme_freigabe_data_owner)
     ? (row.status_abnahme_freigabe_data_owner as string)
     : today.toISOString().slice(0, 10)
-  return { start: row[startPhase.field] as string, end }
+  return { start: row[startStep.field] as string, end }
 }
 
 /**
- * Builds one timeline row per Dienststelle with at least one phase date. Each
- * reached phase becomes a colored milestone. A dashed connector runs from the
- * first phase after Kontaktiert to Abnahme (or today if Abnahme is missing).
+ * Builds one timeline row per Dienststelle with at least one step date. Each
+ * reached step becomes a colored marker. A dashed connector runs from the
+ * first step after Kontaktiert to Abnahme (or today if Abnahme is missing).
  */
 export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
   const today = new Date()
 
   const timelineRows = rows.filter(isTimelineRow).map((row) => {
-    const reachedPhases = PHASE_DEFINITIONS.filter((phase) => hasPhaseValue(row[phase.field]))
-    const phaseRank = PHASE_DEFINITIONS.findLastIndex((phase) => hasPhaseValue(row[phase.field]))
+    const reachedSteps = STEP_DEFINITIONS.filter((step) => hasStepValue(row[step.field]))
+    const stepRank = STEP_DEFINITIONS.findLastIndex((step) => hasStepValue(row[step.field]))
 
-    const milestones: TimelineMilestone[] = reachedPhases.map((phase) => ({
-      key: phase.key,
-      title: phase.title,
-      date: row[phase.field] as string,
-      colorClass: phase.colorClass,
+    const steps: TimelineStepMarker[] = reachedSteps.map((step) => ({
+      key: step.key,
+      title: step.title,
+      date: row[step.field] as string,
+      colorClass: step.colorClass,
     }))
 
     const connectorLine = buildConnectorLine(row, today)
 
     const abbreviation = getDepartmentAbbreviation(row.departement)
 
-    const currentPhaseKey = getRowCurrentPhaseKey(row)!
-    const currentPhase = getCurrentPhase(currentPhaseKey)
+    const currentStepKey = getRowCurrentStepKey(row)!
+    const currentStep = getCurrentStep(currentStepKey)
 
     return {
       posten: row.posten,
       departmentAbbreviation: abbreviation,
       label: `${abbreviation} - ${row.posten}`,
-      phaseRank,
+      stepRank,
       sortDate: row.status_kick_off ?? getSortDate(row),
-      currentPhaseKey,
-      currentPhaseTitle: currentPhase.title,
-      currentPhaseLaneFillClass: currentPhase.laneFillClass,
-      currentPhaseChipClass: currentPhase.chipClass,
-      milestones,
+      currentStepKey,
+      currentStepTitle: currentStep.title,
+      currentStepLaneFillClass: currentStep.laneFillClass,
+      currentStepChipClass: currentStep.chipClass,
+      steps,
       connectorLine,
     }
   })
 
   return timelineRows.sort(
     (a, b) =>
-      b.phaseRank - a.phaseRank
+      b.stepRank - a.stepRank
       || a.sortDate.localeCompare(b.sortDate)
       || a.posten.localeCompare(b.posten),
   )
