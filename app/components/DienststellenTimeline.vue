@@ -5,7 +5,6 @@ import {
   DEPARTMENT_ABBREVIATION_OPTIONS,
   STEP_DEFINITIONS,
   TIMELINE_START_DATE,
-  type StepCountMode,
   type TimelineStepMarker,
   type TimelineRow,
 } from '~/utils/datenkatalog-data'
@@ -14,20 +13,13 @@ const props = defineProps<{
   rows: TimelineRow[]
   selectedStepKey?: string | null
   selectedDepartmentAbbreviation?: string | null
-  stepCountMode?: StepCountMode
   datenstand?: string | null
 }>()
 
 const emit = defineEmits<{
   'select-step': [stepKey: string | null]
   'select-department': [abbreviation: string | null]
-  'update:stepCountMode': [mode: StepCountMode]
 }>()
-
-const stepCountModeItems = [
-  { value: 'cumulative' as const, label: 'Kumulativ' },
-  { value: 'current' as const, label: 'Aktuell' },
-]
 
 const ROW_HEIGHT = 36
 const STEP_MARKER_SIZE = 12
@@ -244,21 +236,12 @@ const legendItems = computed(() =>
 )
 
 /**
- * Visual highlight for legend steps. In cumulative mode, the selected step
- * and all later steps are highlighted (filter shows rows that reached any of them).
- * Click/toggle state remains selectedStepKey only.
+ * Visual highlight for legend steps. Exact match on selectedStepKey only
+ * (timeline filter is always by current step).
  */
 function isLegendStepHighlighted(stepKey: string): boolean {
   const selected = props.selectedStepKey
-  if (selected == null) {
-    return false
-  }
-  if (props.stepCountMode !== 'cumulative') {
-    return selected === stepKey
-  }
-  const selectedIndex = STEP_DEFINITIONS.findIndex((step) => step.key === selected)
-  const itemIndex = STEP_DEFINITIONS.findIndex((step) => step.key === stepKey)
-  return selectedIndex >= 0 && itemIndex >= selectedIndex
+  return selected != null && selected === stepKey
 }
 
 function rowY(rowIndex: number) {
@@ -534,10 +517,6 @@ function onLegendStepClick(stepKey: string | null) {
 function onDepartmentFilterClick(abbreviation: string | null) {
   emit('select-department', abbreviation)
 }
-
-function onStepCountModeClick(mode: StepCountMode) {
-  emit('update:stepCountMode', mode)
-}
 </script>
 
 <template>
@@ -549,25 +528,6 @@ function onStepCountModeClick(mode: StepCountMode) {
       Aktuell sind keine Dienststellen in Bearbeitung.
     </div>
     <template v-else>
-      <div
-        class="rollout-timeline__step-count-mode flex flex-wrap items-center gap-5 mb-10"
-        role="group"
-        aria-label="Zählweise der Kennzahlen"
-      >
-        <button
-          v-for="item in stepCountModeItems"
-          :key="item.value"
-          type="button"
-          class="rollout-timeline__step-count-mode-item text-xs"
-          :class="{
-            'rollout-timeline__step-count-mode-item--selected': stepCountMode === item.value,
-          }"
-          :aria-pressed="stepCountMode === item.value"
-          @click="onStepCountModeClick(item.value)"
-        >
-          {{ item.label }}
-        </button>
-      </div>
       <div class="rollout-timeline__legend flex flex-wrap items-center gap-10 mb-10">
         <button
           type="button"
@@ -950,21 +910,6 @@ function onStepCountModeClick(mode: StepCountMode) {
 .rollout-timeline__edge-arrow {
   pointer-events: auto;
   cursor: pointer;
-}
-
-.rollout-timeline__step-count-mode-item {
-  background: white;
-  border: 1px solid var(--color-gray-300, #d1d5db);
-  border-radius: 0.25rem;
-  padding: 0.15rem 0.5rem;
-  color: var(--color-primary-700, #006874);
-  cursor: pointer;
-}
-
-.rollout-timeline__step-count-mode-item:hover,
-.rollout-timeline__step-count-mode-item--selected {
-  border-color: var(--color-primary-600, #00838f);
-  background: color-mix(in srgb, var(--color-primary-600, #00838f) 8%, white);
 }
 
 .rollout-timeline__legend-item {

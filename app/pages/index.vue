@@ -29,7 +29,7 @@ const datenstand = computed(() => {
   return isoDate ? formatDatenstand(isoDate) : null
 })
 
-/** null = show all; otherwise filter by selected step (semantics follow stepCountMode) */
+/** null = show all; otherwise filter by selected current step */
 const selectedStepKey = ref<string | null>(null)
 
 /** null = show all; otherwise filter by department abbreviation (PD, ED, …) */
@@ -51,12 +51,7 @@ const filteredTimelineRows = computed(() => {
   const stepKey = selectedStepKey.value
   let rows = timelineRows.value
   if (stepKey) {
-    if (stepCountMode.value === 'current') {
-      rows = rows.filter((row) => row.currentStepKey === stepKey)
-    } else {
-      const stepIndex = STEP_DEFINITIONS.findIndex((step) => step.key === stepKey)
-      rows = rows.filter((row) => row.stepRank >= stepIndex)
-    }
+    rows = rows.filter((row) => row.currentStepKey === stepKey)
   }
   const departmentAbbreviation = selectedDepartmentAbbreviation.value
   if (departmentAbbreviation) {
@@ -110,7 +105,6 @@ const filteredTimelineRows = computed(() => {
             erreicht haben – kumulativ oder nur beim aktuellen Schritt.
             Eine Erklärung für den jeweiligen Schritt wird beim Überfahren
             bzw. Antippen des Informations-Icons angezeigt.
-            Der Zeitstrahl visualisiert die erreichten Termine pro begleitete Dienststelle bzw. Fachstelle.
           </p>
         </div>
       </div>
@@ -182,7 +176,7 @@ const filteredTimelineRows = computed(() => {
           <p>
             Übersicht der erreichten Termine je begleitete Dienststelle und Schritt, ab
             Dezember 2025 bis heute. Durch Klicken auf einen Schritt in der Legende werden
-            die Dienststellen nach Schritt gefiltert – kumulativ oder nach aktuellem Stand.
+            die Dienststellen nach ihrem aktuellen Schritt gefiltert.
             Für weiterführende Erklärungen bitte den Abschnitt
             <a href="#anmerkungen">«Anmerkungen»</a> konsultieren.
           </p>
@@ -203,7 +197,6 @@ const filteredTimelineRows = computed(() => {
       </div>
       <DienststellenTimeline
         v-else
-        v-model:step-count-mode="stepCountMode"
         :rows="filteredTimelineRows"
         :selected-step-key="selectedStepKey"
         :selected-department-abbreviation="selectedDepartmentAbbreviation"
