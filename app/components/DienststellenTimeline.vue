@@ -17,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'select-step': [stepKey: string]
+  'select-step': [stepKey: string | null]
   'update:stepCountMode': [mode: StepCountMode]
 }>()
 
@@ -524,7 +524,7 @@ function endScrollDrag(event: PointerEvent) {
   dragPointerId = null
 }
 
-function onLegendStepClick(stepKey: string) {
+function onLegendStepClick(stepKey: string | null) {
   emit('select-step', stepKey)
 }
 
@@ -562,6 +562,18 @@ function onStepCountModeClick(mode: StepCountMode) {
         </button>
       </div>
       <div class="rollout-timeline__legend flex flex-wrap items-center gap-10 mb-10">
+        <button
+          type="button"
+          class="rollout-timeline__legend-item flex items-center gap-5"
+          :class="{
+            'rollout-timeline__legend-item--selected': selectedStepKey == null,
+            'rollout-timeline__legend-item--dimmed': selectedStepKey != null,
+          }"
+          :aria-pressed="selectedStepKey == null"
+          @click="onLegendStepClick(null)"
+        >
+          <span class="text-xs text-primary-600">Alle</span>
+        </button>
         <button
           v-for="item in legendItems"
           :key="item.key"

@@ -32,8 +32,8 @@ const datenstand = computed(() => {
 /** null = show all; otherwise filter by selected step (semantics follow stepCountMode) */
 const selectedStepKey = ref<string | null>(null)
 
-function toggleStepFilter(stepKey: string) {
-  selectedStepKey.value = selectedStepKey.value === stepKey ? null : stepKey
+function selectStepFilter(stepKey: string | null) {
+  selectedStepKey.value = stepKey
 }
 
 const stepDetailByKey = Object.fromEntries(
@@ -194,7 +194,7 @@ const filteredTimelineRows = computed(() => {
         :rows="filteredTimelineRows"
         :selected-step-key="selectedStepKey"
         :datenstand="datenstand"
-        @select-step="toggleStepFilter"
+        @select-step="selectStepFilter"
       />
 
       <div class="my-20 lg:mb-30 xl:pr-220">
