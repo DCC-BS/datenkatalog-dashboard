@@ -32,8 +32,15 @@ const datenstand = computed(() => {
 /** null = show all; otherwise filter by selected step (semantics follow stepCountMode) */
 const selectedStepKey = ref<string | null>(null)
 
+/** null = show all; otherwise filter by department abbreviation (PD, ED, …) */
+const selectedDepartmentAbbreviation = ref<string | null>(null)
+
 function selectStepFilter(stepKey: string | null) {
   selectedStepKey.value = stepKey
+}
+
+function selectDepartmentFilter(abbreviation: string | null) {
+  selectedDepartmentAbbreviation.value = abbreviation
 }
 
 const stepDetailByKey = Object.fromEntries(
@@ -42,14 +49,20 @@ const stepDetailByKey = Object.fromEntries(
 
 const filteredTimelineRows = computed(() => {
   const stepKey = selectedStepKey.value
-  if (!stepKey) {
-    return timelineRows.value
+  let rows = timelineRows.value
+  if (stepKey) {
+    if (stepCountMode.value === 'current') {
+      rows = rows.filter((row) => row.currentStepKey === stepKey)
+    } else {
+      const stepIndex = STEP_DEFINITIONS.findIndex((step) => step.key === stepKey)
+      rows = rows.filter((row) => row.stepRank >= stepIndex)
+    }
   }
-  if (stepCountMode.value === 'current') {
-    return timelineRows.value.filter((row) => row.currentStepKey === stepKey)
+  const departmentAbbreviation = selectedDepartmentAbbreviation.value
+  if (departmentAbbreviation) {
+    rows = rows.filter((row) => row.departmentAbbreviation === departmentAbbreviation)
   }
-  const stepIndex = STEP_DEFINITIONS.findIndex((step) => step.key === stepKey)
-  return timelineRows.value.filter((row) => row.stepRank >= stepIndex)
+  return rows
 })
 </script>
 
@@ -193,8 +206,10 @@ const filteredTimelineRows = computed(() => {
         v-model:step-count-mode="stepCountMode"
         :rows="filteredTimelineRows"
         :selected-step-key="selectedStepKey"
+        :selected-department-abbreviation="selectedDepartmentAbbreviation"
         :datenstand="datenstand"
         @select-step="selectStepFilter"
+        @select-department="selectDepartmentFilter"
       />
 
       <div class="my-20 lg:mb-30 xl:pr-220">

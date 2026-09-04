@@ -2,6 +2,7 @@
 import * as d3 from 'd3'
 import {
   clampToTimelineBounds,
+  DEPARTMENT_ABBREVIATION_OPTIONS,
   STEP_DEFINITIONS,
   TIMELINE_START_DATE,
   type StepCountMode,
@@ -12,12 +13,14 @@ import {
 const props = defineProps<{
   rows: TimelineRow[]
   selectedStepKey?: string | null
+  selectedDepartmentAbbreviation?: string | null
   stepCountMode?: StepCountMode
   datenstand?: string | null
 }>()
 
 const emit = defineEmits<{
   'select-step': [stepKey: string | null]
+  'select-department': [abbreviation: string | null]
   'update:stepCountMode': [mode: StepCountMode]
 }>()
 
@@ -528,6 +531,10 @@ function onLegendStepClick(stepKey: string | null) {
   emit('select-step', stepKey)
 }
 
+function onDepartmentFilterClick(abbreviation: string | null) {
+  emit('select-department', abbreviation)
+}
+
 function onStepCountModeClick(mode: StepCountMode) {
   emit('update:stepCountMode', mode)
 }
@@ -536,7 +543,7 @@ function onStepCountModeClick(mode: StepCountMode) {
 <template>
   <div class="rollout-timeline">
     <div
-      v-if="rows.length === 0 && !selectedStepKey"
+      v-if="rows.length === 0 && !selectedStepKey && !selectedDepartmentAbbreviation"
       class="text-primary-600"
     >
       Aktuell sind keine Dienststellen in Bearbeitung.
@@ -591,6 +598,40 @@ function onStepCountModeClick(mode: StepCountMode) {
             :class="item.swatchClass"
           />
           <span class="text-xs text-primary-600">{{ item.title }}</span>
+        </button>
+      </div>
+
+      <div
+        class="rollout-timeline__department-filter flex flex-wrap items-center gap-10 mb-10"
+        role="group"
+        aria-label="Filter nach Departement"
+      >
+        <button
+          type="button"
+          class="rollout-timeline__legend-item flex items-center gap-5"
+          :class="{
+            'rollout-timeline__legend-item--selected': selectedDepartmentAbbreviation == null,
+            'rollout-timeline__legend-item--dimmed': selectedDepartmentAbbreviation != null,
+          }"
+          :aria-pressed="selectedDepartmentAbbreviation == null"
+          @click="onDepartmentFilterClick(null)"
+        >
+          <span class="text-xs text-primary-600">Alle</span>
+        </button>
+        <button
+          v-for="abbreviation in DEPARTMENT_ABBREVIATION_OPTIONS"
+          :key="abbreviation"
+          type="button"
+          class="rollout-timeline__legend-item flex items-center gap-5"
+          :class="{
+            'rollout-timeline__legend-item--selected': selectedDepartmentAbbreviation === abbreviation,
+            'rollout-timeline__legend-item--dimmed':
+              selectedDepartmentAbbreviation != null && selectedDepartmentAbbreviation !== abbreviation,
+          }"
+          :aria-pressed="selectedDepartmentAbbreviation === abbreviation"
+          @click="onDepartmentFilterClick(abbreviation)"
+        >
+          <span class="text-xs text-primary-600">{{ abbreviation }}</span>
         </button>
       </div>
 

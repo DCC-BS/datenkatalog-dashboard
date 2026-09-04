@@ -116,6 +116,9 @@ const DEPARTMENT_ABBREVIATIONS: Record<string, string> = {
   'Departement für Wirtschaft, Soziales und Umwelt': 'WSU',
 }
 
+/** Stable ordered list of department short codes for filter UI. */
+export const DEPARTMENT_ABBREVIATION_OPTIONS = Object.values(DEPARTMENT_ABBREVIATIONS)
+
 export function getDepartmentAbbreviation(departement: string): string {
   const abbreviation = DEPARTMENT_ABBREVIATIONS[departement]
   if (!abbreviation) {
