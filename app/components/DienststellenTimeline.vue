@@ -528,39 +528,6 @@ function onDepartmentFilterClick(abbreviation: string | null) {
       Aktuell sind keine Dienststellen in Bearbeitung.
     </div>
     <template v-else>
-      <div class="rollout-timeline__legend flex flex-wrap items-center gap-10 mb-10">
-        <button
-          type="button"
-          class="rollout-timeline__legend-item flex items-center gap-5"
-          :class="{
-            'rollout-timeline__legend-item--selected': selectedStepKey == null,
-            'rollout-timeline__legend-item--dimmed': selectedStepKey != null,
-          }"
-          :aria-pressed="selectedStepKey == null"
-          @click="onLegendStepClick(null)"
-        >
-          <span class="text-xs text-primary-600">Alle</span>
-        </button>
-        <button
-          v-for="item in legendItems"
-          :key="item.key"
-          type="button"
-          class="rollout-timeline__legend-item flex items-center gap-5"
-          :class="{
-            'rollout-timeline__legend-item--selected': isLegendStepHighlighted(item.key),
-            'rollout-timeline__legend-item--dimmed': selectedStepKey != null && !isLegendStepHighlighted(item.key),
-          }"
-          :aria-pressed="selectedStepKey === item.key"
-          @click="onLegendStepClick(item.key)"
-        >
-          <span
-            class="inline-block w-10 h-10 rounded-sm"
-            :class="item.swatchClass"
-          />
-          <span class="text-xs text-primary-600">{{ item.title }}</span>
-        </button>
-      </div>
-
       <div
         class="rollout-timeline__department-filter flex flex-wrap items-center gap-10 mb-10"
         role="group"
@@ -592,6 +559,39 @@ function onDepartmentFilterClick(abbreviation: string | null) {
           @click="onDepartmentFilterClick(abbreviation)"
         >
           <span class="text-xs text-primary-600">{{ abbreviation }}</span>
+        </button>
+      </div>
+
+      <div class="rollout-timeline__legend flex flex-wrap items-center gap-10 mb-10">
+        <button
+          type="button"
+          class="rollout-timeline__legend-item flex items-center gap-5"
+          :class="{
+            'rollout-timeline__legend-item--selected': selectedStepKey == null,
+            'rollout-timeline__legend-item--dimmed': selectedStepKey != null,
+          }"
+          :aria-pressed="selectedStepKey == null"
+          @click="onLegendStepClick(null)"
+        >
+          <span class="text-xs text-primary-600">Alle</span>
+        </button>
+        <button
+          v-for="item in legendItems"
+          :key="item.key"
+          type="button"
+          class="rollout-timeline__legend-item flex items-center gap-5"
+          :class="{
+            'rollout-timeline__legend-item--selected': isLegendStepHighlighted(item.key),
+            'rollout-timeline__legend-item--dimmed': selectedStepKey != null && !isLegendStepHighlighted(item.key),
+          }"
+          :aria-pressed="selectedStepKey === item.key"
+          @click="onLegendStepClick(item.key)"
+        >
+          <span
+            class="inline-block w-10 h-10 rounded-sm"
+            :class="item.swatchClass"
+          />
+          <span class="text-xs text-primary-600">{{ item.title }}</span>
         </button>
       </div>
 
