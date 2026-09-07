@@ -11,7 +11,6 @@ useHead({
 
 const { data, pending, error } = await useDatenkatalogData()
 
-const kpis = computed(() => data.value?.kpis ?? [])
 const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
 const datenstand = computed(() => {
   const isoDate = data.value?.dataProcessedDate
@@ -115,7 +114,7 @@ const filteredTimelineRows = computed(() => {
         class="grid grid-cols-2 lg:grid-cols-3 gap-20"
       >
         <div
-          v-for="kpi in kpis"
+          v-for="kpi in (data?.kpis ?? [])"
           :key="kpi.key"
           class="relative"
         >
