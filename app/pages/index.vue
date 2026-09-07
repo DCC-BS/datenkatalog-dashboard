@@ -31,6 +31,10 @@ function selectDepartmentFilter(abbreviation: string | null) {
   selectedDepartmentAbbreviation.value = abbreviation
 }
 
+const stepDetailByKey = Object.fromEntries(
+  STEP_DEFINITIONS.map((step) => [step.key, step.detailContent]),
+)
+
 const filteredTimelineRows = computed(() => {
   const stepKey = selectedStepKey.value
   let rows = timelineRows.value
@@ -70,14 +74,6 @@ const filteredTimelineRows = computed(() => {
         <p>
           Für jede Dienststelle wird sichtbar, welchen Schritt der Umsetzung sie zuletzt
           erreicht hat: «Kontaktiert», «Informiert», «Kick-Off», «Beginn Metadatenerfassung», «Review» und «Abnahme».
-        </p>
-        <p
-          v-for="step in STEP_DEFINITIONS"
-          :key="step.key"
-          v-html="step.detailContent"
-        ></p>
-
-        <p>
           Weitere Informationen über den
           <a href="https://datenkatalog.bs.ch" target="_blank" rel="noopener noreferrer">Kantonalen Datenkatalog</a>
           finden Sie
@@ -95,6 +91,8 @@ const filteredTimelineRows = computed(() => {
           <p>
             Die folgenden Kennzahlen zeigen, wie viele Dienststellen den jeweiligen Schritt bereits
             erreicht haben (kumulativ).
+            Eine Erklärung für den jeweiligen Schritt wird beim Überfahren
+            bzw. Antippen des Informations-Icons angezeigt.
           </p>
         </div>
       </div>
@@ -115,13 +113,27 @@ const filteredTimelineRows = computed(() => {
         v-else
         class="grid grid-cols-2 lg:grid-cols-3 gap-20"
       >
-        <KPICard
+        <div
           v-for="kpi in (data?.kpis ?? [])"
           :key="kpi.key"
-          :title="kpi.title"
-          :description="kpi.description"
-          :value="kpi.count"
-        />
+          class="relative"
+        >
+          <KPICard
+            :title="kpi.title"
+            :description="kpi.description"
+            :value="kpi.count"
+          />
+          <div class="absolute top-10 right-10">
+            <IconHoverBox
+              :title="kpi.title"
+              :aria-label="`Definition: ${kpi.title}`"
+            >
+              <template #body>
+                <div v-html="stepDetailByKey[kpi.key]" />
+              </template>
+            </IconHoverBox>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -211,3 +223,9 @@ const filteredTimelineRows = computed(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(.kpi-card__intro) {
+  padding-right: 28px;
+}
+</style>

@@ -29,7 +29,7 @@ export const STEP_DEFINITIONS = [
     laneFillClass: 'fill-gray-50',
     chipClass: 'bg-gray-100 text-gray-800',
     detailContent:
-      'Mit dem Schritt «<strong>Kontaktiert</strong>» ist die erste Kontaktaufnahme zwischen dem DCC Data Competence Center und der zuständigen Dienststelle erfolgt. Diese kann sowohl durch das DCC Data Competence Center als auch durch die Dienststelle selbst initiiert werden. Ziel ist es, die richtige Ansprechperson zu identifizieren und den weiteren Ablauf gemeinsam abzustimmen.',
+      '<p>Mit dem Schritt «Kontaktiert» ist die erste Kontaktaufnahme zwischen dem DCC Data Competence Center und der zuständigen Dienststelle erfolgt. Diese kann sowohl durch das DCC Data Competence Center als auch durch die Dienststelle selbst initiiert werden. Ziel ist es, die richtige Ansprechperson zu identifizieren und den weiteren Ablauf gemeinsam abzustimmen.</p>',
   },
   {
     key: 'informiert',
@@ -41,7 +41,7 @@ export const STEP_DEFINITIONS = [
     laneFillClass: 'fill-green-50',
     chipClass: 'bg-green-100 text-green-800',
     detailContent:
-      'Mit dem Schritt «<strong>Informiert</strong>» ist die Dienststelle über Ziele, Nutzen und Ablauf des Datenkatalogs informiert. Dazu gehören Zeitplan, Erwartungen an die Metadatenerfassung sowie unterstützende Materialien.',
+      '<p>Mit dem Schritt «Informiert» ist die Dienststelle über Ziele, Nutzen und Ablauf des Datenkatalogs informiert. Dazu gehören Zeitplan, Erwartungen an die Metadatenerfassung sowie unterstützende Materialien.</p>',
   },
   {
     key: 'kickoff',
@@ -53,7 +53,7 @@ export const STEP_DEFINITIONS = [
     laneFillClass: 'fill-green-50',
     chipClass: 'bg-green-100 text-green-800',
     detailContent:
-      'Mit dem Schritt «<strong>Kick-Off</strong>» starten Dienststelle und Projektteam die gemeinsame Umsetzung. Rollen, Verantwortlichkeiten und die nächsten Schritte werden festgelegt.',
+      '<p>Mit dem Schritt «Kick-Off» starten Dienststelle und Projektteam die gemeinsame Umsetzung. Rollen, Verantwortlichkeiten und die nächsten Schritte werden festgelegt.</p>',
   },
   {
     key: 'metadaten',
@@ -65,7 +65,7 @@ export const STEP_DEFINITIONS = [
     laneFillClass: 'fill-green-50',
     chipClass: 'bg-green-100 text-green-800',
     detailContent:
-      'Mit dem Schritt «<strong>Beginn Metadatenerfassung</strong>» startet die Erfassung der relevanten Metadaten im Kantons-Datenkatalog. Dazu zählen Beschreibungen der Datensätze, Verantwortlichkeiten, Aktualisierungszyklen und ggf. Veröffentlichungsstatus. Das DCC Data Competence Center begleitet die Erfassung und steht für die Abstimmung zu Umfang, Auswahl und Beschreibung der Datensätze zur Verfügung.',
+      '<p>Mit dem Schritt «Beginn Metadatenerfassung» startet die Erfassung der relevanten Metadaten im Kantons-Datenkatalog. Dazu zählen Beschreibungen der Datensätze, Verantwortlichkeiten, Aktualisierungszyklen und ggf. Veröffentlichungsstatus. Das DCC Data Competence Center begleitet die Erfassung und steht für die Abstimmung zu Umfang, Auswahl und Beschreibung der Datensätze zur Verfügung.</p>',
   },
   {
     key: 'review',
@@ -77,7 +77,7 @@ export const STEP_DEFINITIONS = [
     laneFillClass: 'fill-yellow-50',
     chipClass: 'bg-yellow-100 text-yellow-800',
     detailContent:
-      'Mit dem Schritt «<strong>Review</strong>» werden die erfassten Metadaten fachlich geprüft. Feedback wird eingearbeitet, bis die Dienststelle die Inhalte inhaltlich abgenommen hat.',
+      '<p>Mit dem Schritt «Review» werden die erfassten Metadaten fachlich geprüft. Feedback wird eingearbeitet, bis die Dienststelle die Inhalte inhaltlich abgenommen hat.</p>',
   },
   {
     key: 'abgenommen',
@@ -89,7 +89,7 @@ export const STEP_DEFINITIONS = [
     laneFillClass: 'fill-purple-50',
     chipClass: 'bg-purple-100 text-purple-800',
     detailContent:
-      'Mit dem Schritt «<strong>Abnahme</strong>» ist die Umsetzung für die Dienststelle formell abgeschlossen. Die Metadaten gelten als freigegeben und werden im Datenkatalog entsprechend geführt.',
+      '<p>Mit dem Schritt «Abnahme» ist die Umsetzung für die Dienststelle formell abgeschlossen. Die Metadaten gelten als freigegeben und werden im Datenkatalog entsprechend geführt.</p>',
   },
 ] as const satisfies ReadonlyArray<{
   key: string
