@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import {
-  buildKpisFromRows,
   buildTimelineRows,
   formatDatenstand,
   STEP_DEFINITIONS,
-  type StepCountMode,
 } from '~/utils/datenkatalog-data'
 
 useHead({
@@ -13,16 +11,7 @@ useHead({
 
 const { data, pending, error } = await useDatenkatalogData()
 
-const stepCountMode = ref<StepCountMode>('cumulative')
-
-const stepCountModeItems = [
-  { value: 'cumulative' as const, label: 'Kumulativ' },
-  { value: 'current' as const, label: 'Aktuell' },
-]
-
-const kpis = computed(() =>
-  buildKpisFromRows(data.value?.rows ?? [], stepCountMode.value),
-)
+const kpis = computed(() => data.value?.kpis ?? [])
 const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
 const datenstand = computed(() => {
   const isoDate = data.value?.dataProcessedDate
@@ -102,29 +91,11 @@ const filteredTimelineRows = computed(() => {
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
             Die folgenden Kennzahlen zeigen, wie viele Dienststellen den jeweiligen Schritt bereits
-            erreicht haben – kumulativ oder nur beim aktuellen Schritt.
+            erreicht haben (kumulativ).
             Eine Erklärung für den jeweiligen Schritt wird beim Überfahren
             bzw. Antippen des Informations-Icons angezeigt.
           </p>
         </div>
-      </div>
-
-      <div
-        class="step-count-mode flex flex-wrap items-center gap-5 mb-20"
-        role="group"
-        aria-label="Zählweise der Kennzahlen"
-      >
-        <button
-          v-for="item in stepCountModeItems"
-          :key="item.value"
-          type="button"
-          class="step-count-mode__item text-xs"
-          :class="{ 'step-count-mode__item--selected': stepCountMode === item.value }"
-          :aria-pressed="stepCountMode === item.value"
-          @click="stepCountMode = item.value"
-        >
-          {{ item.label }}
-        </button>
       </div>
 
       <div
@@ -257,24 +228,5 @@ const filteredTimelineRows = computed(() => {
 <style scoped>
 :deep(.kpi-card__intro) {
   padding-right: 28px;
-}
-
-.step-count-mode__item {
-  background: white;
-  border: 1px solid var(--color-gray-300, #d1d5db);
-  border-radius: 0.25rem;
-  padding: 0.15rem 0.5rem;
-  color: var(--color-primary-700, #006874);
-  cursor: pointer;
-}
-
-.step-count-mode__item:hover {
-  border-color: var(--color-primary-600, #00838f);
-  background: color-mix(in srgb, var(--color-primary-600, #00838f) 8%, white);
-}
-
-.step-count-mode__item--selected {
-  border-color: var(--color-primary-600, #00838f);
-  background: color-mix(in srgb, var(--color-primary-600, #00838f) 8%, white);
 }
 </style>

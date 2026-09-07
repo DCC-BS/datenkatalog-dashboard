@@ -18,9 +18,6 @@ export interface DatenkatalogKpi {
   count: number
 }
 
-/** How step KPI counts and the timeline step filter interpret a step. */
-export type StepCountMode = 'cumulative' | 'current'
-
 export const STEP_DEFINITIONS = [
   {
     key: 'kontaktiert',
@@ -205,19 +202,12 @@ export function formatDatenstand(isoDateTime: string): string | null {
   return `${day}.${month}.${year}`
 }
 
-export function buildKpisFromRows(
-  rows: DatenkatalogRow[],
-  mode: StepCountMode = 'cumulative',
-): DatenkatalogKpi[] {
+export function buildKpisFromRows(rows: DatenkatalogRow[]): DatenkatalogKpi[] {
   return STEP_DEFINITIONS.map((step) => ({
     key: step.key,
     title: step.title,
     description: step.description,
-    count: rows.filter((row) =>
-      mode === 'current'
-        ? getRowCurrentStepKey(row) === step.key
-        : rowReachedStep(row, step.key),
-    ).length,
+    count: rows.filter((row) => rowReachedStep(row, step.key)).length,
   }))
 }
 

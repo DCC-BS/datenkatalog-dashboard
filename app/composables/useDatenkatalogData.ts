@@ -12,7 +12,6 @@ const CATALOG_BASE_URL = 'https://data.bs.ch/api/explore/v2.1/catalog/datasets'
 export interface DatenkatalogPayload {
   rows: DatenkatalogRow[]
   kpis: DatenkatalogKpi[]
-  total: number
   dataProcessedDate: string | null
 }
 
@@ -53,7 +52,6 @@ export function useDatenkatalogData() {
       return {
         rows,
         kpis: buildKpisFromRows(rows),
-        total: rows.length,
         dataProcessedDate,
       }
     },
