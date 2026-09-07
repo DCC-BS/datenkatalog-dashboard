@@ -136,20 +136,6 @@ function hasStepValue(value: string | null | undefined): boolean {
   return value != null && String(value).trim() !== ''
 }
 
-/**
- * Farthest step with a date filled, or null if the row has no step dates.
- * Same rule as timeline `currentStepKey`.
- */
-export function getRowCurrentStepKey(row: DatenkatalogRow): string | null {
-  const stepRank = STEP_DEFINITIONS.findLastIndex((step) =>
-    hasStepValue(row[step.field]),
-  )
-  if (stepRank < 0) {
-    return null
-  }
-  return STEP_DEFINITIONS[stepRank].key
-}
-
 /** True if the row has reached this step or any later one (cumulative). */
 export function rowReachedStep(row: DatenkatalogRow, stepKey: string): boolean {
   const stepIndex = STEP_DEFINITIONS.findIndex((step) => step.key === stepKey)
@@ -278,13 +264,6 @@ function getSortDate(row: DatenkatalogRow): string {
 }
 
 /**
- * Returns the step definition for the current status shown for a Dienststelle.
- */
-function getCurrentStep(lastStepKey: string) {
-  return STEP_DEFINITIONS.find((step) => step.key === lastStepKey)!
-}
-
-/**
  * Dashed connector from the first reached step after Kontaktiert through to
  * Abnahme (or today if Abnahme has not been reached).
  */
@@ -327,8 +306,8 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
 
     const abbreviation = getDepartmentAbbreviation(row.departement)
 
-    const currentStepKey = getRowCurrentStepKey(row)!
-    const currentStep = getCurrentStep(currentStepKey)
+    const currentStep = STEP_DEFINITIONS[stepRank]
+    const currentStepKey = currentStep.key
 
     return {
       posten: row.posten,
