@@ -4,6 +4,7 @@ import {
   formatDatenstand,
   STEP_DEFINITIONS,
 } from '~/utils/datenkatalog-data'
+import IconSymbolCircleWarning from '@kanton-basel-stadt/designsystem/icons/symbol/circle-warning'
 
 useHead({
   title: 'Datenkatalog – Umsetzungsstand | Kanton Basel-Stadt',
@@ -52,31 +53,28 @@ const filteredTimelineRows = computed(() => {
 <template>
   <div class="space-y-30">
     <h1 class="header-title text-primary-600 hyphens-auto text-balance">
-      Datenkatalog – Umsetzungsstand
+      Wo steht der Kanton beim Aufbau des Datenkatalogs?
     </h1>
     <p class="lead mt-30 hyphens-auto lg:hyphens-none text-pretty">
-      Fortschritt bei der Einführung des Kantonalen Datenkatalogs pro Dienststelle – von
-      «Kontaktiert» bis «Abnahme».
+      Der Kanton Basel-Stadt baut seinen
+      <a
+        class="link"
+        href="https://datenkatalog.bs.ch"
+        target="_blank"
+        rel="noopener noreferrer"
+      >kantonalen Datenkatalog</a>
+      schrittweise auf.
+      Dieser schafft einen zentralen Überblick über die Datenbestände des Kantons und macht
+      deren Inhalte und Eigenschaften besser auffindbar.
     </p>
 
     <div class="my-20 lg:mb-30 xl:pr-220">
       <div class="ck-content hyphens-auto lg:hyphens-none">
         <p>
-          Dieses Dashboard gibt einen Überblick über den Rollout des Datenkatalogs
-          im Kanton Basel-Stadt.
-          Es zeigt damit, wie die Metadatenerfassung der kantonalen Datenbestände voranschreitet.
-        </p>
-        <p>
-          Im Dashboard erscheinen nur Dienststellen, mit denen bereits Kontakt zur Umsetzung aufgenommen wurde – entweder
-          durch das DCC Data Competence Center oder auf Initiative der Dienststelle.
-          Nicht aufgeführte Dienststellen stehen bislang noch nicht im Austausch mit dem DCC Data Competence Center.
-        </p>
-        <p>
-          Für jede Dienststelle wird sichtbar, welchen Schritt der Umsetzung sie zuletzt
-          erreicht hat: «Kontaktiert», «Informiert», «Kick-Off», «Beginn Metadatenerfassung», «Review» und «Abnahme».
-          Weitere Informationen über den
-          <a href="https://datenkatalog.bs.ch" target="_blank" rel="noopener noreferrer">Kantonalen Datenkatalog</a>
-          finden Sie
+          Dieses Dashboard zeigt transparent, wie weit die Metadatenerfassung der kantonalen Datenbestände
+          fortgeschritten ist und welche Dienststellen bereits am Rollout beteiligt sind. Die Darstellung wird
+          laufend ergänzt, sobald weitere Dienststellen in den Aufbau des Datenkatalogs einbezogen werden.
+          Weitere Informationen zum Datenkatalog finden Sie
           <a href="https://www.bs.ch/schwerpunkte/daten/databs/schwerpunkte/datenkatalog" target="_blank" rel="noopener noreferrer">hier</a>.
         </p>
       </div>
@@ -84,15 +82,20 @@ const filteredTimelineRows = computed(() => {
 
     <div>
       <h3 class="h3 mb-20 lg:mb-30 mt-10 md:mt-40 xl:mt-50 scroll-mt-10 xl:pr-140">
-        Umsetzungsstand nach Schritt
+        Umsetzungsschritte
       </h3>
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Die folgenden Kennzahlen zeigen, wie viele Dienststellen den jeweiligen Schritt bereits
-            erreicht haben (kumulativ).
-            Eine Erklärung für den jeweiligen Schritt wird beim Überfahren
-            bzw. Antippen des Informations-Icons angezeigt.
+            Die folgenden Kennzahlen zeigen, wie viele Dienststellen die einzelnen Schritte beim Aufbau
+            des Datenkatalogs bereits erreicht haben. Die Schritte bauen aufeinander auf und werden
+            deshalb kumulativ dargestellt. Weitere Informationen erhalten Sie über das
+            <span class="inline-flex items-center align-text-bottom mx-2" role="img" aria-label="i">
+              <IconSymbolCircleWarning
+                class="w-20 h-20 text-primary-600 transform rotate-180"
+                aria-hidden="true"
+              />
+            </span>-Icon des jeweiligen Schritts.
           </p>
         </div>
       </div>
@@ -139,16 +142,17 @@ const filteredTimelineRows = computed(() => {
 
     <div>
       <h3 class="h3 mb-20 lg:mb-30 mt-10 md:mt-40 xl:mt-50 scroll-mt-10 xl:pr-140">
-        Zeitstrahl je Dienststelle
+        Entwicklung über die Zeit
       </h3>
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Übersicht der erreichten Termine je begleitete Dienststelle und Schritt, ab
-            Dezember 2025 bis heute. Durch Klicken auf einen Schritt in der Legende werden
-            die Dienststellen nach ihrem aktuellen Schritt gefiltert.
-            Für weiterführende Erklärungen bitte den Abschnitt
-            <a href="#anmerkungen">«Anmerkungen»</a> konsultieren.
+            Der Zeitstrahl zeigt, wann die einzelnen Dienststellen die verschiedenen Schritte beim Aufbau
+            des Datenkatalogs erreicht haben.<br>
+            Die Darstellung beginnt im Dezember 2025 und wird laufend aktualisiert. Über die Filter können
+            Sie die Dienststellen nach ihrem aktuellen Stand anzeigen.<br>
+            Der zeitliche Verlauf dient dabei vor allem als Einblick in den schrittweisen Aufbau des
+            Datenkatalogs.
           </p>
         </div>
       </div>
@@ -177,24 +181,16 @@ const filteredTimelineRows = computed(() => {
 
       <div class="my-20 lg:mb-30 xl:pr-220">
         <h3
-          id="anmerkungen"
           class="h3 mb-20 lg:mb-30 scroll-mt-10 xl:pr-140"
         >
-          Anmerkungen
+          Einordnung (des Umsetzungsstands)
         </h3>
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Der Zeitstrahl zeigt die erreichten Schritte einer Dienststelle als Termine; der Status rechts markiert den zuletzt erreichten Schritt.
-            Endet die Darstellung vor dem Schritt «Abnahme», lässt sich daraus nicht unmittelbar auf
-            den aktuellen Bearbeitungsstand oder eine Verzögerung schliessen.
-            Der Rollout erfolgt in Abstimmung mit den Dienststellen und orientiert sich an den jeweiligen zeitlichen
-            und organisatorischen Rahmenbedingungen.
-          </p>
-          <p>
-            Auch der Umfang der zu erfassenden Metadaten kann sich zwischen den Dienststellen
-            erheblich unterscheiden. Zwischen den
-            einzelnen Schritten können Phasen daher unterschiedlich lange dauern. Der dargestellte Stand
-            bildet jeweils den letzten dokumentierten Schritt im gemeinsamen Rollout-Prozess ab.
+            Der dargestellte Stand entspricht dem zuletzt dokumentierten Schritt jeder Dienststelle.
+            Die Dauer zwischen den einzelnen Schritten kann je nach organisatorischen Rahmenbedingungen
+            und Umfang der zu erfassenden Datenbestände unterschiedlich ausfallen. Ein direkter zeitlicher
+            Vergleich zwischen den Dienststellen ist deshalb nicht möglich.
           </p>
         </div>
       </div>
@@ -202,15 +198,21 @@ const filteredTimelineRows = computed(() => {
 
     <div>
       <h3 class="h3 mb-20 lg:mb-30 mt-10 md:mt-40 xl:mt-50 scroll-mt-10 xl:pr-140">
-        Interesse am Rollout?
+        Ihre Dienststelle ist noch nicht dabei?
       </h3>
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Möchten Sie den Rollout Ihrer Dienststelle starten? Melden Sie sich einfach
-            per E-Mail oder telefonisch bei uns. Das DCC Data Competence Center begleitet Sie eng bei der
-            Ersterfassung und klärt gemeinsam mit Ihnen, welche Datenbestände sinnvoll im Datenkatalog
-            erfasst werden und wie die Erfassung möglichst ressourcenschonend gestaltet werden kann.
+            Der Datenkatalog lebt von der Beteiligung der Dienststellen.
+          </p>
+          <p>
+            Möchten Sie den Aufbau des Datenkatalogs in Ihrer Dienststelle starten? Das DCC Data
+            Competence Center unterstützt Sie bei der Ersterfassung und klärt gemeinsam mit Ihnen,
+            welche Datenbestände sinnvoll aufgenommen werden und wie die Erfassung effizient und
+            ressourcenschonend erfolgen kann.
+          </p>
+          <p>
+            Nehmen Sie gerne per E-Mail oder telefonisch Kontakt mit uns auf.
           </p>
         </div>
       </div>
