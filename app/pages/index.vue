@@ -93,12 +93,14 @@ const filteredTimelineRows = computed(() => {
             Die folgenden Kennzahlen zeigen, wie viele Dienststellen die einzelnen Schritte beim Aufbau
             des Datenkatalogs bereits erreicht haben. Die Schritte bauen aufeinander auf und werden
             deshalb kumulativ dargestellt. Weitere Informationen erhalten Sie über das
-            <span class="inline-flex items-center align-text-bottom mx-2" role="img" aria-label="i">
+            <span class="relative mx-2 inline-block whitespace-nowrap align-text-bottom">
+              <span class="inline-block w-20 text-center text-transparent">i</span>-Icon
               <IconSymbolCircleWarning
-                class="w-20 h-20 text-primary-600 transform rotate-180"
+                class="pointer-events-none absolute left-0 top-1/2 h-20 w-20 -translate-y-1/2 rotate-180 text-primary-600"
                 aria-hidden="true"
               />
-            </span>-Icon des jeweiligen Schritts.
+            </span>
+            des jeweiligen Schritts.
           </p>
         </div>
       </div>
