@@ -185,11 +185,6 @@ const filteredTimelineRows = computed(() => {
       />
 
       <div class="my-20 lg:mb-30 xl:pr-220">
-        <h3
-          class="h3 mb-20 lg:mb-30 scroll-mt-10 xl:pr-140"
-        >
-          Einordnung (des Umsetzungsstands)
-        </h3>
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
             Der dargestellte Stand entspricht dem zuletzt dokumentierten Schritt jeder Dienststelle.
