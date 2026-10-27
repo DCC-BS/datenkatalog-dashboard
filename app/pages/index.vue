@@ -5,15 +5,12 @@ import {
   STEP_DEFINITIONS,
 } from '~/utils/datenkatalog-data'
 import IconSymbolCircleWarning from '@kanton-basel-stadt/designsystem/icons/symbol/circle-warning'
-import { withBase } from 'ufo'
 
 useHead({
   title: 'Datenkatalog – Umsetzungsstand | Kanton Basel-Stadt',
 })
 
 const { data, pending, error } = await useDatenkatalogData()
-
-const databsMarkSrc = withBase('/images/databs.jpg', useRuntimeConfig().app.baseURL)
 
 const timelineRows = computed(() => buildTimelineRows(data.value?.rows ?? []))
 const datenstand = computed(() => {
@@ -215,23 +212,12 @@ const filteredTimelineRows = computed(() => {
           </p>
         </div>
       </div>
-      <div class="relative">
-        <div class="lg:pr-[min(40%,18rem)]">
-          <Contact
-            name="Josephine Smith"
-            description="wissenschaftliche Mitarbeiterin, Data Competence Center"
-            phone="+41 61 267 87 25"
-            email="dcc@bs.ch"
-          />
-        </div>
-        <img
-          class="hidden lg:block absolute top-0 right-0 h-full w-auto object-contain object-right"
-          :src="databsMarkSrc"
-          alt="data.bs"
-          width="224"
-          height="126"
-        >
-      </div>
+      <Contact
+        name="Josephine Smith"
+        description="wissenschaftliche Mitarbeiterin, Data Competence Center"
+        phone="+41 61 267 87 25"
+        email="dcc@bs.ch"
+      />
     </div>
   </div>
 </template>
