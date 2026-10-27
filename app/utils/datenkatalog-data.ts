@@ -136,15 +136,18 @@ function hasStepValue(value: string | null | undefined): boolean {
   return value != null && String(value).trim() !== ''
 }
 
-/** True if the row has reached this step or any later one (cumulative). */
-export function rowReachedStep(row: DatenkatalogRow, stepKey: string): boolean {
-  const stepIndex = STEP_DEFINITIONS.findIndex((step) => step.key === stepKey)
-  if (stepIndex < 0) {
-    return false
-  }
-  return STEP_DEFINITIONS.slice(stepIndex).some((laterStep) =>
-    hasStepValue(row[laterStep.field]),
+/**
+ * Farthest step with a date filled, or null if the row has no step dates.
+ * Same rule as timeline `currentStepKey`.
+ */
+export function getRowCurrentStepKey(row: DatenkatalogRow): string | null {
+  const stepRank = STEP_DEFINITIONS.findLastIndex((step) =>
+    hasStepValue(row[step.field]),
   )
+  if (stepRank < 0) {
+    return null
+  }
+  return STEP_DEFINITIONS[stepRank].key
 }
 
 export function normalizeDatenkatalogRows(data: unknown): DatenkatalogRow[] {
@@ -193,7 +196,7 @@ export function buildKpisFromRows(rows: DatenkatalogRow[]): DatenkatalogKpi[] {
     key: step.key,
     title: step.title,
     description: step.description,
-    count: rows.filter((row) => rowReachedStep(row, step.key)).length,
+    count: rows.filter((row) => getRowCurrentStepKey(row) === step.key).length,
   }))
 }
 

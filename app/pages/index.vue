@@ -90,9 +90,8 @@ const filteredTimelineRows = computed(() => {
       <div class="my-20 lg:mb-30 xl:pr-220">
         <div class="ck-content hyphens-auto lg:hyphens-none">
           <p>
-            Die folgenden Kennzahlen zeigen, wie viele Dienststellen die einzelnen Schritte beim Aufbau
-            des Datenkatalogs bereits erreicht haben. Die Schritte bauen aufeinander auf und werden
-            deshalb kumulativ dargestellt. Weitere Informationen erhalten Sie über das
+            Die folgenden Kennzahlen zeigen, wie viele Dienststellen sich aktuell in den einzelnen
+            Schritten beim Aufbau des Datenkatalogs befinden. Weitere Informationen erhalten Sie über das
             <span class="relative mx-2 inline-block whitespace-nowrap align-text-bottom">
               <span class="inline-block w-20 text-center text-transparent">i</span>-Icon
               <IconSymbolCircleWarning
