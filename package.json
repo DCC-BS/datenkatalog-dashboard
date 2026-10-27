@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "packageManager": "bun@1.2.20",
+  "packageManager": "bun@1.4.4",
   "license": "GPL-3.0",
   "scripts": {
     "dev": "nuxt dev",
