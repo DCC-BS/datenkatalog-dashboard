@@ -13,7 +13,7 @@
     "postinstall": "npx nuxt prepare"
   },
   "dependencies": {
-    "bs-dashboard-base": "github:StataBS/bs-dashboard-base#v0.1.0",
+    "bs-dashboard-base": "github:StataBS/bs-dashboard-base#v0.2.2",
     "d3": "^7.9.0",
     "nuxt": "^4.0.0",
     "reka-ui": "^2.6.0",
