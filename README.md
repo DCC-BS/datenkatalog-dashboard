@@ -4,8 +4,8 @@ Dashboard for the data catalog (Datenkatalog), built with [Nuxt 4](https://nuxt.
 
 ## Prerequisites
 
-- [Bun](https://bun.sh/) `1.2.20` (see the `packageManager` field in `package.json`)
-- Node.js `24` (only required for Docker; the runtime image uses it)
+- [Bun](https://bun.sh/) `1.4.4` (see the `packageManager` field in `package.json`)
+- Node.js `24.22.1` (only required for Docker; the runtime image uses it)
 
 ## Environment variables
 
