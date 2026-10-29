@@ -1,5 +1,5 @@
 # CVE-2026-111497: pin patched Node (24.22.1+) and Bun (1.4.4+)
-FROM node:24.22.1-alpine AS build
+FROM node:24.22.2-alpine AS build
 
 # Stage 1 — Build the application
 RUN apk add --no-cache git ca-certificates && update-ca-certificates
@@ -15,7 +15,7 @@ RUN bun x nuxi prepare
 RUN bun x nuxi build
 
 # Stage 2 — Run the application
-FROM node:24.22.1-alpine
+FROM node:24.22.2-alpine
 WORKDIR /app
 
 ENV NODE_ENV=production
