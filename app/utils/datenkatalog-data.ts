@@ -2,7 +2,7 @@ export const DATASET_ID = '100537'
 
 export interface DatenkatalogRow {
   departement: string
-  posten: string
+  dienststelle: string
   status_kontaktiert: string | null
   status_info: string | null
   status_kick_off: string | null
@@ -129,7 +129,7 @@ function isDatenkatalogRow(value: unknown): value is DatenkatalogRow {
     return false
   }
   const row = value as Record<string, unknown>
-  return typeof row.departement === 'string' && typeof row.posten === 'string'
+  return typeof row.departement === 'string' && typeof row.dienststelle === 'string'
 }
 
 function hasStepValue(value: string | null | undefined): boolean {
@@ -239,7 +239,7 @@ export interface TimelineConnectorLine {
 }
 
 export interface TimelineRow {
-  posten: string
+  dienststelle: string
   departmentAbbreviation: string
   label: string
   stepRank: number
@@ -313,9 +313,9 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
     const currentStepKey = currentStep.key
 
     return {
-      posten: row.posten,
+      dienststelle: row.dienststelle,
       departmentAbbreviation: abbreviation,
-      label: `${abbreviation} - ${row.posten}`,
+      label: `${abbreviation} - ${row.dienststelle}`,
       stepRank,
       sortDate: row.status_kick_off ?? getSortDate(row),
       currentStepKey,
@@ -331,6 +331,6 @@ export function buildTimelineRows(rows: DatenkatalogRow[]): TimelineRow[] {
     (a, b) =>
       b.stepRank - a.stepRank
       || a.sortDate.localeCompare(b.sortDate)
-      || a.posten.localeCompare(b.posten),
+      || a.dienststelle.localeCompare(b.dienststelle),
   )
 }
