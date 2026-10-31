@@ -46,7 +46,7 @@ const EXTERNAL_LINK_HINT =
               target="_blank"
               rel="noopener noreferrer"
             >
-              Link zur Datenquelle
+              Datenquelle
               <span class="sr-only">{{ EXTERNAL_LINK_HINT }}</span>
             </a>
           </li>
