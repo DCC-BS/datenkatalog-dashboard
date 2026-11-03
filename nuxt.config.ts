@@ -23,15 +23,14 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    // Server-only — never put API keys under `public` (they ship to the browser).
+    bsApiKey: process.env.NUXT_BS_API_KEY || '',
     feedback: {
       repo: 'Feedback_datenkatalog-dashboard',
       repoOwner: 'DCC-BS',
       project: 'datenkatalog-dashboard',
       githubToken: process.env.FEEDBACK_GITHUB_TOKEN || '',
       label: 'feedback',
-    },
-    public: {
-      bsApiKey: process.env.NUXT_PUBLIC_BS_API_KEY || '',
     },
   },
 })

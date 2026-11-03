@@ -17,8 +17,10 @@ cp .env.example .env
 
 | Variable | Description |
 | --- | --- |
-| `NUXT_PUBLIC_BS_API_KEY` | API key for the data.bs.ch open data portal |
+| `NUXT_BS_API_KEY` | Server-only API key for the data.bs.ch open data portal |
 | `NUXT_FEEDBACK_GITHUB_TOKEN` | GitHub token used by the feedback feature |
+
+Portal access runs through `/api/datenkatalog`. Do not use `NUXT_PUBLIC_*` for API keys.
 
 ## Running without Docker
 
