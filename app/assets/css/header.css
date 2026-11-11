@@ -1,0 +1,12 @@
+/* bs.ch keeps a second header row for its navigation. Dashboards only
+   place the logo and the about link, so that row is an empty band. */
+@media (max-width: 1023px) {
+  .page-header {
+    height: auto;
+    min-height: 46px;
+    grid-template: 'L M' / minmax(0, 1fr) auto;
+    grid-template-rows: auto;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
