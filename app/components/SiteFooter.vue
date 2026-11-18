@@ -39,6 +39,7 @@ const EXTERNAL_LINK_HINT =
               <span class="sr-only">{{ EXTERNAL_LINK_HINT }}</span>
             </a>
           </li>
+          <!-- Add this code once the Datenquelle should be visible again.
           <li>
             <a
               class="button is-sm is-link"
@@ -50,6 +51,7 @@ const EXTERNAL_LINK_HINT =
               <span class="sr-only">{{ EXTERNAL_LINK_HINT }}</span>
             </a>
           </li>
+          -->
           <li>
             <a
               class="button is-sm group"
