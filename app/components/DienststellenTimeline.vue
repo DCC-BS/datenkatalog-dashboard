@@ -179,7 +179,7 @@ const lineItems = computed<LineItem[]>(() => {
     if (group) {
       items.push({ type: 'header', key: `header-${group.key}-${index}`, group })
     }
-    items.push({ type: 'row', key: row.dienststelle, row })
+    items.push({ type: 'row', key: `${row.departmentAbbreviation}-${row.dienststelle}`, row })
   })
   return items
 })
@@ -321,7 +321,7 @@ const edgeArrows = computed<EdgeArrow[]>(() => {
     const y = rowY(rowIndex) + ROW_HEIGHT / 2
     if (lastX < viewLeft) {
       arrows.push(buildEdgeArrow({
-        key: `${row.dienststelle}-left`,
+        key: `${row.departmentAbbreviation}-${row.dienststelle}-left`,
         side: 'left',
         y,
         colorClass: lastStep.colorClass,
@@ -331,7 +331,7 @@ const edgeArrows = computed<EdgeArrow[]>(() => {
       }))
     } else if (firstX > viewRight) {
       arrows.push(buildEdgeArrow({
-        key: `${row.dienststelle}-right`,
+        key: `${row.departmentAbbreviation}-${row.dienststelle}-right`,
         side: 'right',
         y,
         colorClass: firstStep.colorClass,
@@ -740,7 +740,7 @@ function onDepartmentFilterClick(abbreviation: string | null) {
 
               <g
                 v-for="(row, rowIndex) in rows"
-                :key="row.dienststelle"
+                :key="`${row.departmentAbbreviation}-${row.dienststelle}`"
               >
                 <line
                   v-if="row.connectorLine"
