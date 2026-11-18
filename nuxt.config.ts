@@ -24,11 +24,11 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     feedback: {
-      repo: 'Feedback_datenkatalog-dashboard',
+      repo: 'Feedback_Datenkatalog-Tools',
       repoOwner: 'DCC-BS',
-      project: 'datenkatalog-dashboard',
+      project: 'Dashboard',
       githubToken: process.env.FEEDBACK_GITHUB_TOKEN || '',
-      label: 'feedback',
+      label: 'Dashboard',
     },
     public: {
       bsApiKey: process.env.NUXT_PUBLIC_BS_API_KEY || '',
