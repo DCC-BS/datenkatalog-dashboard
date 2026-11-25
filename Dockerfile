@@ -1,9 +1,9 @@
-# CVE-2026-111497: pin patched Node (24.22.1+) and Bun (1.4.4+)
+# CVE-2026-111497: pin patched Node (24.22.1+) and Bun (1.4.5+)
 FROM node:24.22.1-alpine AS build
 
 # Stage 1 — Build the application
 RUN apk add --no-cache git ca-certificates && update-ca-certificates
-RUN npm install -g bun@1.4.4
+RUN npm install -g bun@1.4.5
 WORKDIR /app
 ENV NODE_OPTIONS=--max-old-space-size=8192
 
